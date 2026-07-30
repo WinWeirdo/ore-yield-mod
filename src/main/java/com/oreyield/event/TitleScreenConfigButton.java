@@ -33,6 +33,8 @@ public final class TitleScreenConfigButton {
     @SubscribeEvent
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         if (!(event.getScreen() instanceof TitleScreen)) return;
+        Minecraft mc = Minecraft.getInstance();
+        if (mc == null || !mc.isRunning()) return;
         event.addListener(Button.builder(
                 Component.literal("Ore Yield Config"),
                 btn -> Minecraft.getInstance().setScreen(new OreYieldConfigScreen(event.getScreen()))
