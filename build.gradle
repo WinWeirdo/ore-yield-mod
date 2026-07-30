@@ -1,0 +1,50 @@
+plugins {
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '6.0.54'
+}
+
+group = 'com.oreyield'
+version = '1.0.1'
+
+base { archivesName = 'ore-yield' }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+minecraft {
+    mappings channel: 'official', version: '1.20.1'
+    copyIdeResources = true
+
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                ore_yield { source sourceSets.main }
+            }
+        }
+        client {}
+        server { args '--nogui' }
+        data {
+            workingDirectory project.file('run-data')
+            args '--mod', 'ore_yield', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+        }
+    }
+}
+
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+    exclude 'ore-yield/generated_ores.json'
+}
+
+repositories {}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.20.1-47.3.33'
+}
+
+tasks.named('jar', Jar).configure {
+    manifest { attributes(['Specification-Title': 'ore-yield', 'Specification-Vendor': 'oreyield', 'Implementation-Title': project.name, 'Implementation-Version': project.jar.archiveVersion]) }
+}

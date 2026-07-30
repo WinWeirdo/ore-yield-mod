@@ -1,0 +1,41 @@
+# Build output
+build/
+run/
+run-data/
+out/
+output/
+
+# Gradle
+.gradle/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.eclipse/
+.classpath
+.project
+.settings/
+bin/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Generated
+src/generated/
+
+# Runtime
+logs/
+crash-reports/
+*.log
+
+# Mod-specific runtime
+ore_yield_debug.txt
+
+# my stuff
+stuff/
