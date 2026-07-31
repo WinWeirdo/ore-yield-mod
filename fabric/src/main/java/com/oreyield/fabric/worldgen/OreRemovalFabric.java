@@ -10,10 +10,13 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public final class OreRemovalFabric {
+    private static final Logger LOGGER = LoggerFactory.getLogger("ore_yield/WorldGen");
     private static final List<ResourceLocation> FEATURE_IDS = List.of(
             new ResourceLocation("minecraft", "ore_coal_upper"),
             new ResourceLocation("minecraft", "ore_coal_lower"),
@@ -34,7 +37,7 @@ public final class OreRemovalFabric {
             new ResourceLocation("minecraft", "ore_emerald"),
             new ResourceLocation("minecraft", "ore_quartz_nether"),
             new ResourceLocation("minecraft", "ore_gold_nether"),
-            new ResourceLocation("minecraft", "ore_debris_large"),
+            new ResourceLocation("minecraft", "ore_ancient_debris_large"),
             new ResourceLocation("minecraft", "ore_debris_small")
     );
 
@@ -46,7 +49,11 @@ public final class OreRemovalFabric {
                     if (!OreConfig.shouldRemoveVanillaOreGeneration()) return;
                     BiomeModificationContext.GenerationSettingsContext settings = context.getGenerationSettings();
                     for (ResourceLocation id : FEATURE_IDS) {
-                        settings.removeFeature(ResourceKey.create(Registries.PLACED_FEATURE, id));
+                        try {
+                            settings.removeFeature(ResourceKey.create(Registries.PLACED_FEATURE, id));
+                        } catch (IllegalArgumentException e) {
+                            LOGGER.warn("[Ore Yield] Skipping feature removal for {}: not present in the placed feature registry.", id, e);
+                        }
                     }
                 });
     }
