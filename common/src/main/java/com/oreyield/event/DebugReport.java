@@ -61,11 +61,13 @@ public final class DebugReport {
             boolean inConfig = configuredIds.contains(ore.id.toString());
             boolean inConfigTag = false;
             for (String cid : configuredIds) {
-                if (cid.startsWith("#") && ore.block.builtInRegistryHolder().is(
-                        TagKey.create(net.minecraft.core.registries.Registries.BLOCK,
-                                ResourceLocation.tryParse(cid.substring(1))))) {
-                    inConfigTag = true;
-                    break;
+                if (cid.startsWith("#") && cid.length() > 1) {
+                    ResourceLocation tagLoc = ResourceLocation.tryParse(cid.substring(1));
+                    if (tagLoc != null && ore.block.builtInRegistryHolder().is(
+                            TagKey.create(net.minecraft.core.registries.Registries.BLOCK, tagLoc))) {
+                        inConfigTag = true;
+                        break;
+                    }
                 }
             }
             String status = inConfig ? "[CONFIGURED]" : inConfigTag ? "[IN TAG]" : "[NOT CONFIGURED]";
