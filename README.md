@@ -1,5 +1,5 @@
 # ore-yield-mod
-Minecraft mod for forge that makes ores drop from stone and stone like blocks
+Minecraft mod (Forge **and** Fabric, Minecraft 1.20.1) that makes ores drop from stone and stone like blocks
 
 ### Basic Concepts
 
@@ -17,11 +17,29 @@ Ore Yield replaces vanilla ore worldgen. Instead of finding ore blocks in walls,
  config/ore_yield.toml
 ```
 
+The config screen is available on the Forge title screen ("Ore Yield Config" button). On Fabric, install [Mod Menu](https://modrinth.com/mod/modmenu) to open the config screen from the mod list.
+
 ### Key Settings
 
 #### `remove_vanilla_ore_generation` (default: false)
 - `false` — vanilla ores still generate naturally AND stone blocks yield extra drops
 - `true` — vanilla ore generation is removed, only stone-drop system remains
+
+#### `enable_vanilla_end_ores` (default: true)
+- Adds `end_*` variants of the built-in ores (coal, iron, copper, gold, redstone, lapis, diamond, emerald, nether quartz, nether gold) that drop from end stone in the End
+- `false` — end stone yields nothing from the vanilla ore set
+
+#### `bad_luck_eliminator` (default: true)
+- Guarantees each ore eventually drops: after N eligible blocks without a hit, the next eligible block **must** drop that ore
+- Guarantee window: `ceil(bad_luck_multiplier / chance)` eligible blocks
+  - 5% chance + multiplier 2.0 → guaranteed drop after at most 40 blocks
+  - 2% chance + multiplier 2.0 → guaranteed drop after at most 100 blocks
+- Counters are tracked **per player** and reset on a successful drop or config reload
+- Only eligible breaks count (correct dimension, Y range, pickaxe level, not creative, no silk touch)
+- `false` — disables pity, plain independent rolls (default behaviour of previous versions)
+
+#### `bad_luck_multiplier` (default: 2.0)
+- Multiplier for the bad luck eliminator guarantee window (see above); higher = rarer forced drops, clamped to at least 1.0
 
 #### `enable_mod_compat` (default: false)
 - Auto-detects all modded ore blocks and stone blocks at startup
@@ -129,14 +147,11 @@ The following mods are currently supported by `mod_compat_2`:
 
   * Cobalt
 
-* **[The Aether](https://www.curseforge.com/minecraft/mc-mods/the-aether) / [Aether Redux](https://www.curseforge.com/minecraft/mc-mods/aether-redux) / [Deep Aether](https://www.curseforge.com/minecraft/mc-mods/deep-aether)**
+* **[The Aether](https://www.curseforge.com/minecraft/mc-mods/aether) / [Aether Redux](https://www.curseforge.com/minecraft/mc-mods/aether-redux) / [Deep Aether](https://www.curseforge.com/minecraft/mc-mods/deep-aether)**
 
-  * Gravitite (Aether dimension + End)
-  * Zanite (Aether dimension + End)
-  * Ambrosium (Aether dimension + End)
-  * Sentrite (Aether dimension + End)
-  * Skyjade (Aether dimension + End)
-  * Veridium (Aether dimension + End)
-
-  Aether ores drop from Aether stone-type blocks: holystone, mossy holystone, icestone, raw clorite, aseterite, gilded holystone, divinite, driftshale. They also drop from end stone in the End dimension.
-
+  * Gravitite
+  * Zanite
+  * Ambrosium
+  * Sentrite
+  * Skyjade
+  * Veridium
