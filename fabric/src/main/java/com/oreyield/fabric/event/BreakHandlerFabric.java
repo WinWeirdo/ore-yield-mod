@@ -25,7 +25,7 @@ public final class BreakHandlerFabric {
         if (player.isCreative()) return true;
 
         ItemStack tool = player.getMainHandItem();
-        List<OreEntry> rolls = BreakRollStore.prepare(level, pos, state, tool, player);
+        List<OreEntry> rolls = BreakRollStore.takeOrRoll(level, pos, state, tool, level.random, player);
         int fortune = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_FORTUNE, tool);
         int totalXp = 0;
         for (OreEntry hit : rolls) {

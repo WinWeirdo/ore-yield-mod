@@ -41,7 +41,7 @@ public final class OreRemovalFabric {
             new ResourceLocation("minecraft", "ore_quartz_nether"),
             new ResourceLocation("minecraft", "ore_gold_nether"),
             new ResourceLocation("minecraft", "ore_ancient_debris_large"),
-            new ResourceLocation("minecraft", "ore_debris_small")
+            new ResourceLocation("minecraft", "ore_ancient_debris_small")
     );
 
     private OreRemovalFabric() {}

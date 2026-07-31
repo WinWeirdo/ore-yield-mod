@@ -214,7 +214,7 @@ public final class OreConfig {
             int rawXpMax = integer(values, "xp_max", base.xpMax());
             int xpMax = Math.max(xpMin, rawXpMax);
             if (rawXpMax < xpMin) {
-                LOGGER.warn("[Ore Yield] Ore '{}' has xp_max={} less than xp_min={}; xp_max clamped to {}.", id, rawXpMax, xpMin, xpMin);
+                LOGGER.warn("[Ore Yield] Ore '{}' has xp_max={} less than xp_min={}; xp_max clamped to {}.", id, rawXpMax, xpMin, xpMax);
             }
             String dimension = str(values, "dimension", base.dimension());
             int pickLevel = integer(values, "min_pickaxe_level", base.minPickaxeLevel());
@@ -253,17 +253,39 @@ public final class OreConfig {
         String v = values.get(key);
         if (v == null) return def;
         if (!v.startsWith("[") || !v.endsWith("]")) return def;
-        String inner = v.substring(1, v.length() - 1);
-        if (inner.isBlank()) return List.of();
         List<String> out = new ArrayList<>();
-        for (String part : inner.split(",")) {
-            String p = part.strip();
-            if (p.startsWith("\"") && p.endsWith("\"") && p.length() >= 2) {
-                p = p.substring(1, p.length() - 1);
-            }
-            if (!p.isEmpty()) out.add(p);
+        for (String part : splitTomlArray(v.substring(1, v.length() - 1))) {
+            if (!part.isEmpty()) out.add(part);
         }
         return out;
+    }
+
+    /** Splits the inner contents of a TOML array on commas, honoring quoted elements (which may contain commas). */
+    private static List<String> splitTomlArray(String inner) {
+        List<String> parts = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+        for (int i = 0; i < inner.length(); i++) {
+            char c = inner.charAt(i);
+            if (c == '"') {
+                inQuotes = !inQuotes;
+            }
+            if (c == ',' && !inQuotes) {
+                parts.add(unquote(current.toString().strip()));
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+        parts.add(unquote(current.toString().strip()));
+        return parts;
+    }
+
+    private static String unquote(String value) {
+        if (value.startsWith("\"") && value.endsWith("\"") && value.length() >= 2) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
     }
 
     private static Optional<OreEntry> parseAdditional(String raw) {
