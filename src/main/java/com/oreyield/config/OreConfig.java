@@ -248,18 +248,13 @@ public final class OreConfig {
             return parseAdditionalLegacy(part, 0);
         }
         if (part.length == 14) {
-            // Could be legacy-with-pickaxe (no dimension) or dimension-without-pickaxe
-            // Heuristic: if field[12] is a known dimension string, it's dimension-without-pickaxe
-            String maybeDim = part[12].trim();
-            if (maybeDim.startsWith("minecraft:") || maybeDim.contains(":")) {
-                return parseAdditionalWithDimension(part, 0);
-            }
-            // Otherwise it's legacy with min_pickaxe_level appended
+            // Could be legacy-with-pickaxe (no dimension, field[13] is pickaxe level)
+            // or dimension-without-pickaxe (field[12] is dimension, field[13] is hosts)
             try {
                 int pickLevel = Integer.parseInt(part[13].trim());
                 return parseAdditionalLegacy(part, Math.max(0, Math.min(3, pickLevel)));
             } catch (NumberFormatException e) {
-                return java.util.Optional.empty();
+                return parseAdditionalWithDimension(part, 0);
             }
         }
         if (part.length == 15) {
