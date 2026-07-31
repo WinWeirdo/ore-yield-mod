@@ -63,11 +63,13 @@ public final class BreakRollStore {
         List<OreEntry> hits = new ArrayList<>();
         for (OreEntry entry : OreConfig.entriesFor(state, dimension)) {
             boolean hit = entry.rollsAt(pos, random, dimension);
-            if (!hit && player != null && BadLuckEliminator.shouldForceDrop(player, entry)) {
+            boolean eligible = player != null
+                    && BadLuckEliminator.isEligible(entry, state, dimension, pos, tool, player);
+            if (!hit && eligible && BadLuckEliminator.shouldForceDrop(player, entry)) {
                 hit = true;
             }
             if (hit) hits.add(entry);
-            if (player != null && BadLuckEliminator.isEligible(entry, state, dimension, pos, tool, player)) {
+            if (eligible) {
                 BadLuckEliminator.advance(player, entry.id(), hit);
             }
         }
