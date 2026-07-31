@@ -29,8 +29,9 @@ Ore Yield replaces vanilla ore worldgen. Instead of finding ore blocks in walls,
 - Requires restart
 
 #### `enable_mod_compat_2` (default: true)
-- Enables a curated set of 17 ores from 5 specific mods:
+- Enables a curated set of ores from specific mods:
   - iceandfire, simpleores, better_tools, tconstruct, netherrocks
+  - aether, aether_redux, deep_aether (Aether dimension ores + End variants)
 - Only listed ores are enabled (no auto-detection noise)
 - Requires restart
 
@@ -127,4 +128,15 @@ The following mods are currently supported by `mod_compat_2`:
 * **[Tinkers' Construct](https://www.curseforge.com/minecraft/mc-mods/tinkers-construct)**
 
   * Cobalt
+
+* **[The Aether](https://www.curseforge.com/minecraft/mc-mods/the-aether) / [Aether Redux](https://www.curseforge.com/minecraft/mc-mods/aether-redux) / [Deep Aether](https://www.curseforge.com/minecraft/mc-mods/deep-aether)**
+
+  * Gravitite (Aether dimension + End)
+  * Zanite (Aether dimension + End)
+  * Ambrosium (Aether dimension + End)
+  * Sentrite (Aether dimension + End)
+  * Skyjade (Aether dimension + End)
+  * Veridium (Aether dimension + End)
+
+  Aether ores drop from Aether stone-type blocks: holystone, mossy holystone, icestone, raw clorite, aseterite, gilded holystone, divinite, driftshale. They also drop from end stone in the End dimension.
 

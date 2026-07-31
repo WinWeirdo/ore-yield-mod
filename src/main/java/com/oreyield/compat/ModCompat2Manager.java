@@ -9,6 +9,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.core.registries.Registries;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -35,15 +36,26 @@ public final class ModCompat2Manager {
     private static final String OW_DIM = "minecraft:overworld";
     private static final String NE_DIM = "minecraft:the_nether";
     private static final String EN_DIM = "minecraft:the_end";
+    private static final String AE_DIM = "aether:the_aether";
     private static final String OW_HOSTS = "#forge:overworld_ore_bearing_stones";
     private static final String NE_HOSTS = "#forge:nether_ore_bearing_stones";
     private static final String EN_HOSTS = "minecraft:end_stone";
+    private static final String AE_HOSTS = "aether:icestone,deep_aether:raw_clorite,aether:holystone,aether:mossy_holystone,deep_aether:aseterite,aether_redux:gilded_holystone,aether_redux:divinite,aether_redux:driftshale";
 
     private record OreSpec(String oreBlockId, String dropItem, int minPickaxeLevel,
                            String dimension, String hostTag,
                            int minCount, int maxCount, double chance,
                            int minY, int maxY, int peakY,
-                           FortuneType fortuneType) {}
+                           FortuneType fortuneType, int xpMin, int xpMax) {
+        OreSpec(String oreBlockId, String dropItem, int minPickaxeLevel,
+                String dimension, String hostTag,
+                int minCount, int maxCount, double chance,
+                int minY, int maxY, int peakY,
+                FortuneType fortuneType) {
+            this(oreBlockId, dropItem, minPickaxeLevel, dimension, hostTag,
+                    minCount, maxCount, chance, minY, maxY, peakY, fortuneType, 0, 0);
+        }
+    }
 
     private static final List<OreSpec> ORE_SPECS = List.of(
             // Overworld
@@ -56,16 +68,16 @@ public final class ModCompat2Manager {
             new OreSpec("simpleores:mythril_ore", "simpleores:raw_mythril", 2,
                     OW_DIM, OW_HOSTS, 1, 1, 0.03125, 1, 96, -1, FortuneType.ORE),
             new OreSpec("better_tools:ruby_ore", "better_tools:ruby", 1,
-                    OW_DIM, OW_HOSTS, 2, 5, 0.0390625, -64, 16, -24, FortuneType.ORE),
+                    OW_DIM, OW_HOSTS, 2, 5, 0.0390625, -64, 16, -24, FortuneType.ORE, 3, 7),
             new OreSpec("better_tools:sapphire_ore", "better_tools:sapphire", 2,
                     OW_DIM, OW_HOSTS, 1, 1, 0.0390625, 100, 260, 180, FortuneType.ORE),
             new OreSpec("better_tools:topaz_ore", "better_tools:topaz", 2,
-                    OW_DIM, OW_HOSTS, 2, 5, 0.014, 0, 120, 60, FortuneType.ORE),
+                    OW_DIM, OW_HOSTS, 2, 5, 0.014, 0, 120, 60, FortuneType.ORE, 2, 5),
             // Nether
             new OreSpec("simpleores:onyx_ore", "simpleores:onyx_gem", 3,
                     NE_DIM, NE_HOSTS, 1, 1, 0.01, 138, 246, -1, FortuneType.ORE),
             new OreSpec("better_tools:nether_diamond_ore", "better_tools:nether_diamond", 2,
-                    NE_DIM, NE_HOSTS, 1, 1, 0.025, 128, 256, -1, FortuneType.ORE),
+                    NE_DIM, NE_HOSTS, 1, 1, 0.025, 128, 256, -1, FortuneType.ORE, 3, 7),
             new OreSpec("tconstruct:cobalt_ore", "tconstruct:raw_cobalt", 2,
                     NE_DIM, NE_HOSTS, 1, 1, 0.0115, 136, 248, 192, FortuneType.ORE),
             new OreSpec("netherrocks:argonite_ore", "netherrocks:raw_argonite", 3,
@@ -83,7 +95,33 @@ public final class ModCompat2Manager {
             // End — no Y restriction, void starts at 0 so forcing specific Y is dangerous
             // end_titanium_ore drops itself, so fortune should not multiply it
             new OreSpec("better_tools:end_titanium_ore", "better_tools:end_titanium_ore", 3,
-                    EN_DIM, EN_HOSTS, 1, 1, 0.008, 0, 320, -1, FortuneType.NONE)
+                    EN_DIM, EN_HOSTS, 1, 1, 0.008, 0, 320, -1, FortuneType.NONE),
+            // Aether dimension
+            new OreSpec("aether:gravitite_ore", "aether_redux:raw_gravitite", 2,
+                    AE_DIM, AE_HOSTS, 1, 1, 0.010, 0, 320, -1, FortuneType.ORE),
+            new OreSpec("aether:zanite_ore", "aether:zanite_gemstone", 1,
+                    AE_DIM, AE_HOSTS, 1, 1, 0.010, 0, 320, -1, FortuneType.ORE, 2, 5),
+            new OreSpec("aether:ambrosium_ore", "aether:ambrosium_shard", 0,
+                    AE_DIM, AE_HOSTS, 1, 1, 0.050, 0, 320, -1, FortuneType.ORE, 0, 2),
+            new OreSpec("aether_redux:sentrite", "aether_redux:sentrite", 0,
+                    AE_DIM, AE_HOSTS, 1, 1, 0.030, 0, 320, -1, FortuneType.ORE),
+            new OreSpec("deep_aether:skyjade_ore", "deep_aether:skyjade", 2,
+                    AE_DIM, AE_HOSTS, 1, 1, 0.020, 0, 320, -1, FortuneType.ORE),
+            new OreSpec("aether_redux:veridium_ore", "aether_redux:raw_veridium", 1,
+                    AE_DIM, AE_HOSTS, 1, 1, 0.020, 0, 320, -1, FortuneType.ORE),
+            // Aether ores — End variants (host = end_stone, no Y restriction)
+            new OreSpec("aether:gravitite_ore", "aether_redux:raw_gravitite", 2,
+                    EN_DIM, EN_HOSTS, 1, 1, 0.010, 0, 320, -1, FortuneType.ORE),
+            new OreSpec("aether:zanite_ore", "aether:zanite_gemstone", 1,
+                    EN_DIM, EN_HOSTS, 1, 1, 0.010, 0, 320, -1, FortuneType.ORE, 2, 5),
+            new OreSpec("aether:ambrosium_ore", "aether:ambrosium_shard", 0,
+                    EN_DIM, EN_HOSTS, 1, 1, 0.050, 0, 320, -1, FortuneType.ORE, 0, 2),
+            new OreSpec("aether_redux:sentrite", "aether_redux:sentrite", 0,
+                    EN_DIM, EN_HOSTS, 1, 1, 0.030, 0, 320, -1, FortuneType.ORE),
+            new OreSpec("deep_aether:skyjade_ore", "deep_aether:skyjade", 2,
+                    EN_DIM, EN_HOSTS, 1, 1, 0.020, 0, 320, -1, FortuneType.ORE),
+            new OreSpec("aether_redux:veridium_ore", "aether_redux:raw_veridium", 1,
+                    EN_DIM, EN_HOSTS, 1, 1, 0.020, 0, 320, -1, FortuneType.ORE)
     );
 
     private static final Set<String> ORE_IDS = new HashSet<>();
@@ -161,17 +199,20 @@ public final class ModCompat2Manager {
 
             String entryId = id.getNamespace() + ":" + id.getPath().replace("_ore", "");
 
+            List<String> hosts = Arrays.stream(spec.hostTag.split(","))
+                    .map(String::trim).filter(s -> !s.isEmpty()).toList();
+
             OreEntry entry = new OreEntry(
                     entryId,
                     true,
-                    List.of(spec.hostTag),
+                    hosts,
                     spec.dropItem,
                     spec.minCount, spec.maxCount,
                     spec.chance,
                     spec.minY, spec.maxY,
                     spec.peakY,
                     spec.fortuneType,
-                    0, 0,
+                    spec.xpMin, spec.xpMax,
                     spec.dimension,
                     spec.minPickaxeLevel
             );
