@@ -6,5 +6,5 @@ plugins {
 
 subprojects {
     group = 'com.oreyield'
-    version = rootProject.findProperty('mod_version') ?: '1.0.1'
+    version = rootProject.findProperty('mod_version') ?: '1.0.3'
 }

@@ -19,6 +19,7 @@ public final class OreConfigIO {
 
     public static void load(Path configFile) {
         OreConfig.setConfigPath(configFile);
+        OreConfig.clearOverrides();
         if (!Files.exists(configFile)) {
             save(configFile);
             OreConfig.rebuild();

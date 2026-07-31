@@ -86,6 +86,11 @@ public final class OreConfig {
         return OVERRIDES.getOrDefault(id, DEFAULT_ENTRIES.get(id));
     }
 
+    /** Drops all previously loaded [ore.*] section overrides (called when (re)reading the config file). */
+    public static void clearOverrides() {
+        OVERRIDES.clear();
+    }
+
     public static boolean shouldRemoveVanillaOreGeneration() {
         return removeVanillaOreGeneration;
     }

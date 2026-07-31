@@ -57,7 +57,7 @@ The config screen is available on the Forge title screen ("Ore Yield Config" but
 - When true, compat2 ores configured for overworld/nether also drop from end stone in the End
 - Ancient debris is always excluded from End drops
 
-### Built-in Ore Entries (config/ores/*)
+### Built-in Ore Entries (`[ore.*]` sections in `config/ore_yield.toml`)
 
 Each ore has these fields:
 | Field | Description |

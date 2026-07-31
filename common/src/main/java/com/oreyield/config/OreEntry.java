@@ -8,6 +8,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.Tier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -32,8 +33,14 @@ public record OreEntry(String id, boolean enabled, List<String> hosts, String re
         return Math.max(0, Math.min(level, 3));
     }
 
-    public boolean meetsPickaxeRequirement(ItemStack tool) {
+    /**
+     * Pickaxe requirement check. An empty hand is never a pickaxe: only non-player
+     * breaks (explosions, pistons) may bypass the tool requirement, so their drops
+     * work like the old "empty tool = diamond level" behaviour.
+     */
+    public boolean meetsPickaxeRequirement(ItemStack tool, Player player) {
         if (minPickaxeLevel <= 0) return true;
+        if (tool.isEmpty()) return player == null;
         int level = getPickaxeLevel(tool);
         return level >= minPickaxeLevel;
     }
@@ -48,19 +55,15 @@ public record OreEntry(String id, boolean enabled, List<String> hosts, String re
     }
 
     public boolean matches(BlockState state, String currentDimension) {
-        boolean dimensionMatch = dimension.isEmpty() || dimension.equals(currentDimension);
-        if (!dimensionMatch) {
-            if (currentDimension.equals("minecraft:the_end")
-                    && !id.equals("ancient_debris")
-                    && com.oreyield.config.OreConfig.isModCompat2OresInEnd()) {
-                dimensionMatch = true;
-            }
-        }
+        boolean inEnd = currentDimension.equals("minecraft:the_end");
+        boolean endOverride = inEnd
+                && com.oreyield.config.OreConfig.isModCompat2Enabled()
+                && com.oreyield.config.OreConfig.isModCompat2OresInEnd()
+                && com.oreyield.compat.ModCompat2Manager.isCuratedEntry(id)
+                && !com.oreyield.compat.ModCompat2Manager.hasEndVariant(id);
+        boolean dimensionMatch = dimension.isEmpty() || dimension.equals(currentDimension) || endOverride;
         if (!dimensionMatch) return false;
         ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(state.getBlock());
-        boolean endOverride = currentDimension.equals("minecraft:the_end")
-                && com.oreyield.config.OreConfig.isModCompat2OresInEnd()
-                && !id.equals("ancient_debris");
         if (endOverride && "minecraft:end_stone".equals(blockId.toString())) return true;
         for (String host : hosts) {
             if (host.startsWith("#")) {

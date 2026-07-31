@@ -33,14 +33,14 @@ public final class BadLuckEliminator {
     }
 
     /** A block break counts as a failure for this ore only if it could have dropped it. */
-    public static boolean isEligible(OreEntry entry, BlockState state, String dimension, BlockPos pos, ItemStack tool) {
+    public static boolean isEligible(OreEntry entry, BlockState state, String dimension, BlockPos pos, ItemStack tool, Player player) {
         if (!isEnabled()) return false;
         if (!entry.enabled()) return false;
         double chance = entry.chance();
         if (chance <= 0.0D || chance >= 1.0D) return false;
         if (!entry.matches(state, dimension)) return false;
         if (!entry.canRollAt(pos, dimension)) return false;
-        return entry.meetsPickaxeRequirement(tool);
+        return entry.meetsPickaxeRequirement(tool, player);
     }
 
     /** True when this break must yield the ore at 100% to end the streak. */

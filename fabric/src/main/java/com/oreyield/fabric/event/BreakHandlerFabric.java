@@ -29,7 +29,7 @@ public final class BreakHandlerFabric {
         int fortune = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_FORTUNE, tool);
         int totalXp = 0;
         for (OreEntry hit : rolls) {
-            if (!hit.meetsPickaxeRequirement(tool)) continue;
+            if (!hit.meetsPickaxeRequirement(tool, player)) continue;
             ItemStack extra = hit.createDrop(level.random, fortune);
             if (!extra.isEmpty()) {
                 Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, extra);

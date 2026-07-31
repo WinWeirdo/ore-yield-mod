@@ -21,7 +21,7 @@ public final class BreakXpHandler {
         ItemStack tool = event.getPlayer() == null ? ItemStack.EMPTY : event.getPlayer().getMainHandItem();
         int totalXp = 0;
         for (OreEntry hit : BreakRollStore.prepare(level, event.getPos(), event.getState(), tool, event.getPlayer())) {
-            if (!hit.meetsPickaxeRequirement(tool)) continue;
+            if (!hit.meetsPickaxeRequirement(tool, event.getPlayer())) continue;
             totalXp += hit.rollXp(level.random);
         }
         if (totalXp > 0) {

@@ -37,7 +37,7 @@ public final class OreYieldLootModifier extends LootModifier {
         Player player = context.getParamOrNull(LootContextParams.THIS_ENTITY) instanceof Player p ? p : null;
         List<OreEntry> hits = BreakRollStore.takeOrRoll(context.getLevel(), pos, state, tool, context.getRandom(), player);
         for (OreEntry hit : hits) {
-            if (!hit.meetsPickaxeRequirement(tool)) continue;
+            if (!hit.meetsPickaxeRequirement(tool, player)) continue;
             ItemStack extra = hit.createDrop(context.getRandom(), fortune);
             if (!extra.isEmpty()) generatedLoot.add(extra);
         }

@@ -3,8 +3,10 @@ package com.oreyield.fabric;
 import com.oreyield.OreYieldMod;
 import com.oreyield.fabric.event.BreakHandlerFabric;
 import com.oreyield.fabric.worldgen.OreRemovalFabric;
+import com.oreyield.loot.BreakRollStore;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 
 public final class OreYieldModFabric implements ModInitializer {
@@ -13,6 +15,7 @@ public final class OreYieldModFabric implements ModInitializer {
         OreYieldMod.init();
         PlayerBlockBreakEvents.BEFORE.register(BreakHandlerFabric::onBreak);
         ServerLifecycleEvents.SERVER_STARTING.register(OreYieldMod::discoverModdedDimensions);
+        ServerWorldEvents.UNLOAD.register((server, world) -> BreakRollStore.onLevelUnload(world));
         OreRemovalFabric.register();
     }
 }

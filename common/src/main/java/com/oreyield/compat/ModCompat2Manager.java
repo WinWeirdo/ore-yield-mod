@@ -125,6 +125,7 @@ public final class ModCompat2Manager {
     );
 
     private static final Set<String> ORE_IDS = new HashSet<>();
+    private static final Set<String> END_VARIANT_IDS = new HashSet<>();
     private static final Set<String> autoDetectedHosts = new HashSet<>();
     private static final List<OreEntry> autoDetectedOres = new ArrayList<>();
     private static final Set<String> moddedDimensionNamespaces = new HashSet<>();
@@ -133,6 +134,9 @@ public final class ModCompat2Manager {
     static {
         for (OreSpec spec : ORE_SPECS) {
             ORE_IDS.add(spec.oreBlockId);
+            if (EN_DIM.equals(spec.dimension)) {
+                END_VARIANT_IDS.add(spec.oreBlockId);
+            }
         }
     }
 
@@ -246,6 +250,16 @@ public final class ModCompat2Manager {
 
     public static boolean isAutoDetectedHost(String blockId) {
         return autoDetectedHosts.contains(blockId);
+    }
+
+    /** True if the entry id belongs to the curated mod compat 2 ore set. */
+    public static boolean isCuratedEntry(String entryId) {
+        return ORE_IDS.contains(entryId) || ORE_IDS.contains(entryId + "_ore");
+    }
+
+    /** True if the entry id already has an explicit End-stone variant in the curated set. */
+    public static boolean hasEndVariant(String entryId) {
+        return END_VARIANT_IDS.contains(entryId) || END_VARIANT_IDS.contains(entryId + "_ore");
     }
 
     public static Set<String> getAutoDetectedHosts() {

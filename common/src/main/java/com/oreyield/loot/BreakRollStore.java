@@ -36,10 +36,11 @@ public final class BreakRollStore {
         List<OreEntry> existing = byPosition.get(immutable);
         if (existing != null) return existing;
         List<OreEntry> rolls = roll(level, pos, state, level.random, tool, player);
-        if (byPosition.size() < MAX_PENDING_PER_LEVEL) {
+        if (byPosition.size() >= MAX_PENDING_PER_LEVEL) {
             // Cap reached — skip caching this block (rolls will be recomputed in takeOrRoll fallback)
-            byPosition.put(immutable, rolls);
+            return rolls;
         }
+        byPosition.put(immutable, rolls);
         return rolls;
     }
 
@@ -66,7 +67,7 @@ public final class BreakRollStore {
                 hit = true;
             }
             if (hit) hits.add(entry);
-            if (player != null && BadLuckEliminator.isEligible(entry, state, dimension, pos, tool)) {
+            if (player != null && BadLuckEliminator.isEligible(entry, state, dimension, pos, tool, player)) {
                 BadLuckEliminator.advance(player, entry.id(), hit);
             }
         }

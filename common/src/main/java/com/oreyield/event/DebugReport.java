@@ -42,7 +42,6 @@ public final class DebugReport {
         sb.append("\n");
 
         List<OreEntry> configured = OreConfig.allEntries();
-        List<String> configuredIds = configured.stream().map(OreEntry::id).toList();
 
         List<OreBlockInfo> registryOres = scanRegistryForOres();
         List<OreBlockInfo> moddedOres = registryOres.stream()
@@ -58,21 +57,29 @@ public final class DebugReport {
         int notConfiguredCount = 0;
 
         for (OreBlockInfo ore : moddedOres) {
-            boolean inConfig = configuredIds.contains(ore.id.toString());
-            boolean inConfigTag = false;
-            for (String cid : configuredIds) {
-                if (cid.startsWith("#") && cid.length() > 1) {
-                    ResourceLocation tagLoc = ResourceLocation.tryParse(cid.substring(1));
-                    if (tagLoc != null && ore.block.builtInRegistryHolder().is(
-                            TagKey.create(net.minecraft.core.registries.Registries.BLOCK, tagLoc))) {
-                        inConfigTag = true;
-                        break;
+            boolean inConfig = false;
+            boolean inHosts = false;
+            for (OreEntry entry : configured) {
+                String entryId = entry.id();
+                if (ore.id.toString().equals(entryId) || ore.id.toString().equals(entryId + "_ore")) {
+                    inConfig = true;
+                    break;
+                }
+                for (String host : entry.hosts()) {
+                    if (host.equals(ore.id.toString())) {
+                        inHosts = true;
+                    } else if (host.startsWith("#") && host.length() > 1) {
+                        ResourceLocation tagLoc = ResourceLocation.tryParse(host.substring(1));
+                        if (tagLoc != null && ore.block.builtInRegistryHolder().is(
+                                TagKey.create(net.minecraft.core.registries.Registries.BLOCK, tagLoc))) {
+                            inHosts = true;
+                        }
                     }
                 }
             }
-            String status = inConfig ? "[CONFIGURED]" : inConfigTag ? "[IN TAG]" : "[NOT CONFIGURED]";
+            String status = inConfig ? "[CONFIGURED]" : inHosts ? "[IN HOST]" : "[NOT CONFIGURED]";
 
-            if (inConfig || inConfigTag) configuredCount++;
+            if (inConfig || inHosts) configuredCount++;
             else notConfiguredCount++;
 
             String tags = ore.tags.isEmpty() ? "none" : String.join(", ", ore.tags);
