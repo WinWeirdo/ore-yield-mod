@@ -1,14 +1,75 @@
 pluginManagement {
+    def versions = new groovy.json.JsonSlurper().parse(file('versions.json'))
+    def activeMc = providers.gradleProperty('mc')
+            .orElse(providers.environmentVariable('MC_VERSION'))
+            .orElse(versions.first().mc as String)
+            .get()
+    def entry = versions.find { it.mc == activeMc }
+
+    def props = new Properties()
+    file('gradle.properties').withInputStream { props.load(it) }
+    def loomVersion = (entry && entry.loom) ? entry.loom as String : (props['loom_version'] ?: '1.10.455')
+
     repositories {
         gradlePluginPortal()
         maven { url = 'https://maven.minecraftforge.net/' }
         maven { url = 'https://maven.fabricmc.net/' }
         maven { url = 'https://maven.architectury.dev/' }
+        maven { url = 'https://maven.neoforged.net/releases/' }
+        maven { url = 'https://maven.terraformersmc.com/releases/' }
     }
+    plugins {
+        id 'dev.architectury.loom' version "${loomVersion}"
+        id 'net.minecraftforge.gradle' version "${props['forgegradle_version']}"
+        id 'com.gradleup.shadow' version "${props['shadow_version']}"
+        id 'net.neoforged.moddev' version "${props['moddev_version']}"
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
 }
 
 rootProject.name = 'ore-yield'
 
-include 'common'
-include 'forge'
-include 'fabric'
+def versions = new groovy.json.JsonSlurper().parse(file('versions.json'))
+def activeMc = providers.gradleProperty('mc')
+        .orElse(providers.environmentVariable('MC_VERSION'))
+        .orElse(versions.first().mc as String)
+        .get()
+def entry = versions.find { it.mc == activeMc }
+
+if (entry == null) {
+    throw new GradleException("Unknown Minecraft version '$activeMc'. Pick one from versions.json, e.g. -Pmc=1.21.1")
+}
+
+if (!entry.get('standalone')) {
+    def slug = entry.mc.replace('.', '_')
+    def genRoot = file('build/generated')
+
+    def projects = [["${slug}-common", "${genRoot}/${entry.mc}/common"]]
+    entry.loaders.each { loader ->
+        projects.add(["${slug}-${loader}", "${genRoot}/${entry.mc}/${loader}"])
+    }
+    projects.each { name, dir ->
+        if (!file(dir).isDirectory()) {
+            throw new GradleException("Generated project '$name' missing at $dir.\n" +
+                    "Run: python scripts/generate.py ${entry.mc}  (or python scripts/generate.py --all)")
+        }
+        include ":$name"
+        project(":$name").projectDir = file(dir)
+    }
+}
+
+def wrapperProps = new Properties()
+file('gradle/wrapper/gradle-wrapper.properties').withInputStream { wrapperProps.load(it) }
+def wrapperMatch = (wrapperProps['distributionUrl'] =~ /gradle-([0-9.]+)-bin\.zip/)
+if (wrapperMatch && !entry.get('standalone')) {
+    def wrapperVersion = wrapperMatch[0][1]
+    if (entry.gradle && wrapperVersion != entry.gradle) {
+        logger.warn("Entry ${entry.mc} wants Gradle ${entry.gradle} but the wrapper is ${wrapperVersion}." +
+                " Run: .\\gradlew wrapper --gradle-version ${entry.gradle}")
+    }
+}
+
+gradle.ext.oreyield = entry

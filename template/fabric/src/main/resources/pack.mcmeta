@@ -1,0 +1,14 @@
+{
+  "pack": {
+    "description": "Ore Yield"
+    //? if pack_format_range {
+    ,"min_format": [{{pack_format}}, 0]
+    ,"max_format": [2147483647, 2147483647]
+    //?} else if pack_supported_formats {
+    ,"pack_format": {{pack_format}}
+    ,"supported_formats": [{{pack_min_format}}, {{pack_format}}]
+    //?} else {
+    ,"pack_format": {{pack_format}}
+    //?}
+  }
+}

@@ -1,0 +1,92 @@
+plugins {
+    id 'java'
+    //? if loom_no_remap {
+    id '{{loom_plugin}}'
+    //?} else {
+    id 'dev.architectury.loom'
+    id 'com.gradleup.shadow'
+    //?}
+}
+
+base { archivesName = 'ore-yield-fabric' }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of({{java}})
+
+//? if !loom_no_remap {
+loom {
+    silentMojangMappingsLicense()
+}
+//?}
+
+repositories {
+    maven { url = 'https://maven.terraformersmc.com/releases/' }
+}
+
+configurations {
+    common
+    //? if !loom_no_remap {
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentFabric.extendsFrom common
+    //?}
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:{{mc}}"
+    //? if !loom_no_remap {
+    mappings loom.officialMojangMappings()
+    //?}
+    //? if loom_no_remap {
+    implementation "net.fabricmc:fabric-loader:{{fabric_loader}}"
+    implementation "net.fabricmc.fabric-api:fabric-api:{{fabric_api}}"
+    //?} else {
+    modImplementation "net.fabricmc:fabric-loader:{{fabric_loader}}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:{{fabric_api}}"
+    //?}
+
+    //? if has_modmenu {
+    //? if loom_no_remap {
+    compileOnly "com.terraformersmc:modmenu:{{modmenu}}"
+    //?} else {
+    modCompileOnly "com.terraformersmc:modmenu:{{modmenu}}"
+    //?}
+    //?}
+
+    //? if loom_no_remap {
+    common(project(path: '{{common_project}}', configuration: 'apiElements')) { transitive = false }
+    implementation(project(path: '{{common_project}}')) { transitive = false }
+    //?} else {
+    common(project(path: '{{common_project}}', configuration: 'namedElements')) { transitive = false }
+    //?}
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') {
+        expand version: project.version
+    }
+}
+
+//? if loom_no_remap {
+jar {
+    dependsOn(project('{{common_project}}').tasks.named('jar'))
+    from(configurations.common.collect { it.isDirectory() ? it : zipTree(it) })
+    manifest {
+        attributes([
+                'Specification-Title': 'ore-yield',
+                'Specification-Vendor': 'oreyield',
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.jar.archiveVersion
+        ])
+    }
+}
+//?} else {
+shadowJar {
+    configurations = [project.configurations.common]
+    archiveClassifier = 'dev-shadow'
+}
+
+remapJar {
+    inputFile.set shadowJar.archiveFile
+}
+//?}

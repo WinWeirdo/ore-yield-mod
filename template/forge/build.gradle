@@ -1,0 +1,60 @@
+plugins {
+    id 'java'
+    id 'net.minecraftforge.gradle'
+}
+
+base { archivesName = 'ore-yield-forge' }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of({{java}})
+
+minecraft {
+    mappings channel: 'official', version: '{{mc}}'
+    copyIdeResources = true
+
+    runs {
+        configureEach {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                ore_yield {
+                    source sourceSets.main
+                }
+            }
+        }
+        client {}
+        server { args '--nogui' }
+        data {
+            workingDirectory project.file('run-data')
+            args '--mod', 'ore_yield', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+        }
+    }
+}
+
+configurations {
+    common
+}
+
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+    exclude 'ore-yield/generated_ores.json'
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:{{forge}}"
+
+    common(project(path: '{{common_project}}', configuration: 'namedElements')) { transitive = false }
+    implementation(project(path: '{{common_project}}', configuration: 'namedElements')) { transitive = false }
+}
+
+tasks.named('jar', Jar).configure {
+    from(configurations.common.collect { it.isDirectory() ? it : zipTree(it) })
+    manifest {
+        attributes([
+                'Specification-Title': 'ore-yield',
+                'Specification-Vendor': 'oreyield',
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.jar.archiveVersion
+        ])
+    }
+}

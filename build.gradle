@@ -1,10 +1,11 @@
 plugins {
-    id 'dev.architectury.loom' version "${loom_version}" apply false
-    id 'net.minecraftforge.gradle' version "${forgegradle_version}" apply false
-    id 'com.gradleup.shadow' version "${shadow_version}" apply false
+    id 'dev.architectury.loom' apply false
+    id 'net.minecraftforge.gradle' apply false
+    id 'com.gradleup.shadow' apply false
+    id 'net.neoforged.moddev' apply false
 }
 
 subprojects {
     group = 'com.oreyield'
-    version = rootProject.findProperty('mod_version') ?: '1.0.3'
+    version = rootProject.findProperty('mod_version') ?: '1.1.0'
 }

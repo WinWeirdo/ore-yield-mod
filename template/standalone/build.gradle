@@ -1,0 +1,10 @@
+plugins {
+    id '{{loom_plugin}}' version "{{loom}}" apply false
+    id 'com.gradleup.shadow' version "{{shadow_version}}" apply false
+    id 'net.neoforged.moddev' version "{{moddev_version}}" apply false
+}
+
+subprojects {
+    group = 'com.oreyield'
+    version = rootProject.findProperty('mod_version') ?: '1.1.0'
+}

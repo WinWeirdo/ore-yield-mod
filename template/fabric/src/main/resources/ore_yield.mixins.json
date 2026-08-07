@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "com.oreyield.fabric.mixin",
+  "compatibilityLevel": "JAVA_{{java}}",
+  "mixins": [
+    "BlockDropMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

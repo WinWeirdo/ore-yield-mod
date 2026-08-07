@@ -1,0 +1,23 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://maven.minecraftforge.net/' }
+        maven { url = 'https://maven.fabricmc.net/' }
+        maven { url = 'https://maven.architectury.dev/' }
+        maven { url = 'https://maven.neoforged.net/releases/' }
+        maven { url = 'https://maven.terraformersmc.com/releases/' }
+    }
+    plugins {
+        id '{{loom_plugin}}' version "{{loom}}"
+        id 'com.gradleup.shadow' version "{{shadow_version}}"
+        id 'net.neoforged.moddev' version "{{moddev_version}}"
+    }
+}
+
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
+rootProject.name = 'ore-yield-{{mc}}'
+
+include 'common', 'fabric', 'neoforge'

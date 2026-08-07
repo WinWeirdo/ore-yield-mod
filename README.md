@@ -57,6 +57,18 @@ The config screen is available on the Forge title screen ("Ore Yield Config" but
 - When true, compat2 ores configured for overworld/nether also drop from end stone in the End
 - Ancient debris is always excluded from End drops
 
+#### `auto_detect_dimensions` (default: true)
+- On world load, detects available dimensions and adds modded ones (e.g. Twilight Forest, Blue Skies, Ad Astra planets, Moon, Venus) to the `enabled_dimensions` list
+- In those dimensions, the overworld ore set drops from stone-like blocks just like in the overworld (same Y ranges, chances, and bad luck eliminator)
+- Skips vanilla dimensions and curated mod_compat_2 dimensions (Aether and friends) so their own ores are not affected
+- `false` — no dimension detection; ores only drop in the dimensions listed per entry
+- New dimensions are detected on the next world load after installing a dimension mod
+
+#### `enabled_dimensions` (default: empty)
+- List of extra dimensions where the overworld ore set also drops, e.g. `enabled_dimensions = ["twilight_forest:twilight_forest", "ad_astra:moon"]`
+- Populated automatically by `auto_detect_dimensions`; you can also edit it manually to prune or pin entries
+- Ignored while `auto_detect_dimensions` is disabled
+
 ### Built-in Ore Entries (`[ore.*]` sections in `config/ore_yield.toml`)
 
 Each ore has these fields:
@@ -155,3 +167,9 @@ The following mods are currently supported by `mod_compat_2`:
   * Sentrite
   * Skyjade
   * Veridium
+
+### Development
+
+- [docs/BUILDING.md](docs/BUILDING.md) — how to generate and build every supported MC version (including the standalone 26.x workflow)
+- [docs/ADDING_A_VERSION.md](docs/ADDING_A_VERSION.md) — how to add a new Minecraft version to the matrix
+- [docs/VERSION_MATRIX.md](docs/VERSION_MATRIX.md) — auto-generated version/flag matrix

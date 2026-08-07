@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+    id 'net.neoforged.moddev'
+}
+
+base { archivesName = 'ore-yield-neoforge' }
+
+java.toolchain.languageVersion = JavaLanguageVersion.of({{java}})
+
+neoForge {
+    version = "{{neoforge}}"
+
+    runs {
+        client { client() }
+        server { server() }
+        data {
+            //? if neoforge_server_data {
+            serverData()
+            //?} else {
+            data()
+            //?}
+            programArguments.addAll '--mod', 'ore_yield', '--all',
+                    '--output', file('src/generated/resources/').absolutePath,
+                    '--existing', file('src/main/resources/').absolutePath
+        }
+    }
+    mods {
+        ore_yield {
+            sourceSet sourceSets.main
+            // The common project is embedded in the production jar.  Register
+            // it with ModDev too, otherwise client/server/data runs cannot load
+            // the shared OreYieldMod entry point.
+            sourceSet project('{{common_project}}').sourceSets.main
+        }
+    }
+}
+
+configurations {
+    common
+}
+
+sourceSets.main.resources {
+    srcDir 'src/generated/resources'
+    exclude 'ore-yield/generated_ores.json'
+}
+
+dependencies {
+    //? if loom_no_remap {
+    common(project(path: '{{common_project}}', configuration: 'apiElements')) { transitive = false }
+    implementation(project(path: '{{common_project}}')) { transitive = false }
+    //?} else {
+    common(project(path: '{{common_project}}', configuration: 'namedElements')) { transitive = false }
+    implementation(project(path: '{{common_project}}', configuration: 'namedElements')) { transitive = false }
+    //?}
+}
+
+tasks.named('jar', Jar).configure {
+    dependsOn(project('{{common_project}}').tasks.named('jar'))
+    from(configurations.common.collect { it.isDirectory() ? it : zipTree(it) })
+    manifest {
+        attributes([
+                'Specification-Title': 'ore-yield',
+                'Specification-Vendor': 'oreyield',
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.jar.archiveVersion
+        ])
+    }
+}

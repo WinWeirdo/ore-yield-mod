@@ -1,0 +1,190 @@
+[
+  {
+    "mc": "1.20.1",
+    "loaders": ["forge", "fabric"],
+    "java": 17,
+    "gradle": "8.11.1",
+    "pack_format": 15,
+    "pack_format_range": false,
+    "deps": {
+      "forge": "1.20.1-47.3.33",
+      "fabric_loader": "0.16.14",
+      "fabric_api": "0.92.3+1.20.1",
+      "modmenu": "7.2.2"
+    },
+    "flags": {
+      "enchant_holder_api": false,
+      "enchant_helper_stack_first": false,
+      "enchant_iteminstance_api": false,
+      "item_instance_api": false,
+      "resourcelocation_factory_required": false,
+      "identifier_renamed": false,
+      "loot_type_unrolling": false
+    }
+  },
+  {
+    "mc": "1.21.1",
+    "loaders": ["fabric", "neoforge"],
+    "java": 21,
+    "gradle": "8.11.1",
+    "pack_format": 48,
+    "pack_min_format": 34,
+    "pack_format_range": false,
+    "deps": {
+      "neoforge": "21.1.248",
+      "fabric_loader": "0.16.14",
+      "fabric_api": "0.116.15+1.21.1",
+      "modmenu": "11.0.4"
+    },
+    "flags": {
+      "enchant_holder_api": true,
+      "enchant_helper_stack_first": false,
+      "enchant_iteminstance_api": false,
+      "item_instance_api": false,
+      "resourcelocation_factory_required": true,
+      "identifier_renamed": false,
+      "loot_type_unrolling": false,
+      "tier_item_map": true,
+      "render_background_4args": true,
+      "screen_vanilla_background": true,
+      "eventbus_bus_attribute": true,
+      "gather_data_include_server": true,
+      "pack_supported_formats": true
+    }
+  },
+  {
+    "mc": "1.21.11",
+    "loaders": ["fabric", "neoforge"],
+    "java": 21,
+    "gradle": "8.11.1",
+    "loom": "1.13.469",
+    "pack_format": 75,
+    "pack_format_range": true,
+    "deps": {
+      "neoforge": "21.11.45",
+      "fabric_loader": "0.17.3",
+      "fabric_api": "0.141.6+1.21.11",
+      "modmenu": "17.0.1-beta.1"
+    },
+    "flags": {
+      "enchant_holder_api": true,
+      "enchant_helper_stack_first": false,
+      "enchant_iteminstance_api": false,
+      "item_instance_api": false,
+      "resourcelocation_factory_required": true,
+      "identifier_renamed": true,
+      "loot_type_unrolling": false,
+      "tier_item_map": true,
+      "render_background_4args": true,
+      "screen_vanilla_background": true,
+      "gui_graphics_argb": true,
+      "minecraft_set_screen_and_show": true,
+      "resourcekey_identifier": true,
+      "copper_tools_exist": true,
+      "registry_get_optional": true,
+      "keymapping_category": true,
+      "window_handle": true,
+      "player_display_client_message": true,
+      "level_is_client_side_method": true,
+      "registryaccess_lookup": true,
+      "loot_context_parameter_api": true,
+      "neoforge_server_data": true
+    },
+    "renames": {
+      "ResourceLocation": "Identifier"
+    }
+  },
+  {
+    "mc": "26.1.2",
+    "loaders": ["fabric", "neoforge"],
+    "java": 25,
+    "gradle": "9.6.0",
+    "loom": "1.17.17",
+    "loom_plugin": "net.fabricmc.fabric-loom",
+    "standalone": true,
+    "pack_format": 84,
+    "pack_format_range": true,
+    "deps": {
+      "neoforge": "26.1.2.94",
+      "fabric_loader": "0.19.3",
+      "fabric_api": "0.155.2+26.1.2",
+      "modmenu": "18.0.0"
+    },
+    "flags": {
+      "enchant_holder_api": true,
+      "enchant_iteminstance_api": true,
+      "item_instance_api": true,
+      "resourcelocation_factory_required": true,
+      "identifier_renamed": true,
+      "loot_type_unrolling": true,
+      "tier_item_map": true,
+      "render_background_4args": true,
+      "resourcekey_identifier": true,
+      "copper_tools_exist": true,
+      "registry_get_optional": true,
+      "keymapping_category": true,
+      "window_handle": true,
+      "level_is_client_side_method": true,
+      "registryaccess_lookup": true,
+      "loot_context_parameter_api": true,
+      "screen_extract_render_state": true,
+      "screen_vanilla_background": true,
+      "break_block_event": true,
+      "loot_modifier_priority": true,
+      "neoforge_server_data": true,
+      "fabric_keymapping_renamed": true,
+      "fabric_server_level_events": true,
+      "player_display_client_message": false
+    },
+    "renames": {
+      "ResourceLocation": "Identifier"
+    }
+  },
+  {
+    "mc": "26.2",
+    "loaders": ["fabric", "neoforge"],
+    "java": 25,
+    "gradle": "9.6.0",
+    "loom": "1.17.17",
+    "loom_plugin": "net.fabricmc.fabric-loom",
+    "standalone": true,
+    "pack_format": 88,
+    "pack_format_range": true,
+    "deps": {
+      "neoforge": "26.2.0.41-beta",
+      "fabric_loader": "0.19.3",
+      "fabric_api": "0.156.0+26.2",
+      "modmenu": "20.0.1"
+    },
+    "flags": {
+      "enchant_holder_api": true,
+      "enchant_iteminstance_api": true,
+      "item_instance_api": true,
+      "resourcelocation_factory_required": true,
+      "identifier_renamed": true,
+      "loot_type_unrolling": true,
+      "tier_item_map": true,
+      "render_background_4args": true,
+      "resourcekey_identifier": true,
+      "copper_tools_exist": true,
+      "registry_get_optional": true,
+      "keymapping_category": true,
+      "window_handle": true,
+      "level_is_client_side_method": true,
+      "registryaccess_lookup": true,
+      "loot_context_parameter_api": true,
+      "screen_extract_render_state": true,
+      "screen_vanilla_background": true,
+      "break_block_event": true,
+      "loot_modifier_priority": true,
+      "neoforge_server_data": true,
+      "fabric_keymapping_renamed": true,
+      "fabric_server_level_events": true,
+      "player_display_client_message": false,
+      "minecraft_set_screen_and_show": true
+    },
+    "renames": {
+      "ResourceLocation": "Identifier"
+    }
+  }
+]
