@@ -1,5 +1,13 @@
 # ore-yield-mod
-Minecraft mod (Forge **and** Fabric, Minecraft 1.20.1) that makes ores drop from stone and stone like blocks
+Minecraft mod for **Forge, Fabric, and NeoForge** that makes ores drop from stone and stone-like blocks.
+
+### Supported Loaders and Versions
+
+| Loader | Supported Minecraft versions |
+|---|---|
+| Forge | 1.20.1 |
+| Fabric | 1.20.1, 1.21.1, 1.21.11, 26.1.2, 26.2 |
+| NeoForge | 1.21.1, 1.21.11, 26.1.2, 26.2 |
 
 ### Basic Concepts
 
@@ -17,7 +25,7 @@ Ore Yield replaces vanilla ore worldgen. Instead of finding ore blocks in walls,
  config/ore_yield.toml
 ```
 
-The config screen is available on the Forge title screen ("Ore Yield Config" button). On Fabric, install [Mod Menu](https://modrinth.com/mod/modmenu) to open the config screen from the mod list.
+The config screen is available from the Forge and NeoForge title screens ("Ore Yield Config" button). On Fabric, install [Mod Menu](https://modrinth.com/mod/modmenu) to open the config screen from the mod list.
 
 ### Key Settings
 
