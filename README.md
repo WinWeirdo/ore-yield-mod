@@ -107,10 +107,6 @@ mineral_pocket_ancient_max_count = 2
 
 The category weights preserve the intended approximate per-break rates: Coal 1/10,000; Metal 1/15,000; Precious 1/22,000; Gem 1/40,000; Ancient 1/250,000. Metal pools use raw iron and copper plus installed Create Zinc and Mekanism Tin/Lead. Gem pools use diamond and emerald plus installed Mekanism Fluorite. A pocket announces itself after its drops are awarded.
 
-### Create and Mekanism compatibility
-
-With `enable_mod_compat_2 = true`, Ore Yield detects Create Zinc and Mekanism Tin, Osmium, Uranium, Fluorite, and Lead only when the corresponding mod is installed. Their Ore Yield definitions are written as editable `[ore.create:zinc]` and `[ore.mekanism:*]` sections in the generated config. No new End variants are added; these entries retain their Overworld profiles.
-
 To replace native compatible ores in **new chunks only**, enable vanilla worldgen removal and leave the compatibility safeguard enabled:
 
 ```toml
@@ -118,7 +114,7 @@ remove_vanilla_ore_generation = true
 remove_compatible_ore_generation = true
 ```
 
-Only the verified Create Zinc and Mekanism Tin/Osmium/Uranium/Fluorite/Lead placed features are removed. Existing chunks and already-generated ore blocks are unaffected.
+Existing chunks and already-generated ore blocks are unaffected.
 
 #### `remove_vanilla_ore_generation` (default: false)
 - `false` — vanilla ores still generate naturally AND stone blocks yield extra drops
