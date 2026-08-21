@@ -227,6 +227,18 @@ The mod provides these tags for use in `host_blocks`:
 
 The following mods are currently supported by `mod_compat_2`:
 
+* **[Create](https://www.curseforge.com/minecraft/mc-mods/create)**
+
+  * Zinc
+
+* **[Mekanism](https://www.curseforge.com/minecraft/mc-mods/mekanism)**
+
+  * Tin
+  * Osmium
+  * Uranium
+  * Fluorite
+  * Lead
+
 * **[Ice and Fire](https://www.curseforge.com/minecraft/mc-mods/ice-and-fire-dragons)**
 
   * Silver
