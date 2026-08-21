@@ -20,6 +20,14 @@
       "resourcelocation_factory_required": false,
       "identifier_renamed": false,
       "loot_type_unrolling": false
+      ,"item_model_definition": false
+      ,"crafting_input_api": false
+      ,"recipe_codec_api": false
+      ,"legacy_crafting_dimensions": true
+      ,"custom_recipe_serializer_api": false
+      ,"singular_data_directories": false
+      ,"block_properties_full_copy": false
+      ,"block_properties_require_id": false
     }
   },
   {
@@ -50,6 +58,14 @@
       "eventbus_bus_attribute": true,
       "gather_data_include_server": true,
       "pack_supported_formats": true
+      ,"item_model_definition": false
+      ,"crafting_input_api": true
+      ,"recipe_codec_api": false
+      ,"legacy_crafting_dimensions": true
+      ,"custom_recipe_serializer_api": false
+      ,"singular_data_directories": true
+      ,"block_properties_full_copy": true
+      ,"block_properties_require_id": false
     }
   },
   {
@@ -89,6 +105,14 @@
       "registryaccess_lookup": true,
       "loot_context_parameter_api": true,
       "neoforge_server_data": true
+      ,"item_model_definition": true
+      ,"crafting_input_api": true
+      ,"recipe_codec_api": false
+      ,"legacy_crafting_dimensions": false
+      ,"custom_recipe_serializer_api": true
+      ,"singular_data_directories": true
+      ,"block_properties_full_copy": true
+      ,"block_properties_require_id": true
     },
     "renames": {
       "ResourceLocation": "Identifier"
@@ -135,6 +159,14 @@
       "fabric_keymapping_renamed": true,
       "fabric_server_level_events": true,
       "player_display_client_message": false
+      ,"item_model_definition": true
+      ,"crafting_input_api": true
+      ,"recipe_codec_api": true
+      ,"legacy_crafting_dimensions": false
+      ,"custom_recipe_serializer_api": false
+      ,"singular_data_directories": true
+      ,"block_properties_full_copy": true
+      ,"block_properties_require_id": true
     },
     "renames": {
       "ResourceLocation": "Identifier"
@@ -182,6 +214,14 @@
       "fabric_server_level_events": true,
       "player_display_client_message": false,
       "minecraft_set_screen_and_show": true
+      ,"item_model_definition": true
+      ,"crafting_input_api": true
+      ,"recipe_codec_api": true
+      ,"legacy_crafting_dimensions": false
+      ,"custom_recipe_serializer_api": false
+      ,"singular_data_directories": true
+      ,"block_properties_full_copy": true
+      ,"block_properties_require_id": true
     },
     "renames": {
       "ResourceLocation": "Identifier"

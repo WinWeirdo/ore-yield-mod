@@ -2,6 +2,8 @@ package com.oreyield.fabric.mixin;
 
 import com.oreyield.config.OreEntry;
 import com.oreyield.loot.BreakRollStore;
+import com.oreyield.loot.BreakContext;
+import com.oreyield.loot.MineralPocketResult;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
@@ -39,7 +41,7 @@ public abstract class BlockDropMixin {
         if (!(level instanceof ServerLevel serverLevel)) return;
 
         List<OreEntry> hits = BreakRollStore.takeOrRoll(serverLevel, pos, state, ItemStack.EMPTY,
-                serverLevel.getRandom(), null);
+                serverLevel.getRandom(), null, BreakContext.AUTOMATED);
         int totalXp = 0;
         for (OreEntry hit : hits) {
             if (!hit.meetsPickaxeRequirement(ItemStack.EMPTY, null)) continue;
@@ -48,6 +50,11 @@ public abstract class BlockDropMixin {
                 Containers.dropItemStack(serverLevel, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, extra);
             }
             totalXp += hit.rollXp(serverLevel.getRandom());
+        }
+        MineralPocketResult pocket = BreakRollStore.takeOrRollMineralPocket(serverLevel, pos, state, tool,
+                serverLevel.getRandom(), null, BreakContext.AUTOMATED);
+        for (ItemStack extra : pocket.drops()) {
+            Containers.dropItemStack(serverLevel, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, extra);
         }
         if (totalXp > 0) {
             ExperienceOrb.award(serverLevel, Vec3.atCenterOf(pos), totalXp);

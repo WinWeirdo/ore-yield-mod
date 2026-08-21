@@ -1,0 +1,6 @@
+//? if singular_data_directories {
+{
+  "type": "minecraft:block",
+  "pools": []
+}
+//?}

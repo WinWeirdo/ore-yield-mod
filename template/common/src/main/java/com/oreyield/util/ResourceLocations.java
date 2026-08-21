@@ -17,5 +17,14 @@ public final class ResourceLocations {
         //?}
     }
 
+    /** Returns null for malformed config IDs without throwing during game startup. */
+    public static ResourceLocation tryParse(String value) {
+        //? if identifier_renamed {
+        return Identifier.tryParse(value);
+        //?} else {
+        return ResourceLocation.tryParse(value);
+        //?}
+    }
+
     private ResourceLocations() {}
 }

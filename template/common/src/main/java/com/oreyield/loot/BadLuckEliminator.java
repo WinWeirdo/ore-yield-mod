@@ -27,16 +27,25 @@ public final class BadLuckEliminator {
 
     /** Guarantee window in eligible blocks; Integer.MAX_VALUE when pity does not apply (chance 0 or >= 1). */
     public static int window(OreEntry entry) {
-        double chance = entry.chance();
+        return window(entry, 1.0D);
+    }
+
+    public static int window(OreEntry entry, double chanceMultiplier) {
+        double chance = Math.min(1.0D, entry.chance() * Math.max(0.0D, chanceMultiplier));
         if (chance <= 0.0D || chance >= 1.0D) return Integer.MAX_VALUE;
         return (int) Math.ceil(OreConfig.badLuckMultiplier() / chance);
     }
 
     /** A block break counts as a failure for this ore only if it could have dropped it. */
     public static boolean isEligible(OreEntry entry, BlockState state, String dimension, BlockPos pos, ItemStack tool, Player player) {
+        return isEligible(entry, state, dimension, pos, tool, player, 1.0D);
+    }
+
+    public static boolean isEligible(OreEntry entry, BlockState state, String dimension, BlockPos pos, ItemStack tool, Player player,
+                                     double chanceMultiplier) {
         if (!isEnabled()) return false;
         if (!entry.enabled()) return false;
-        double chance = entry.chance();
+        double chance = Math.min(1.0D, entry.chance() * Math.max(0.0D, chanceMultiplier));
         if (chance <= 0.0D || chance >= 1.0D) return false;
         if (!entry.matches(state, dimension)) return false;
         if (!entry.canRollAt(pos, dimension)) return false;
@@ -44,12 +53,12 @@ public final class BadLuckEliminator {
     }
 
     /** True when this break must yield the ore at 100% to end the streak. */
-    public static boolean shouldForceDrop(Player player, OreEntry entry) {
+    public static boolean shouldForceDrop(Player player, String counterId, OreEntry entry, double chanceMultiplier) {
         if (!isEnabled()) return false;
         Map<String, Integer> perOre = FAILURES.get(player.getUUID());
         if (perOre == null) return false;
-        Integer fails = perOre.get(entry.id());
-        return fails != null && fails >= window(entry) - 1;
+        Integer fails = perOre.get(counterId);
+        return fails != null && fails >= window(entry, chanceMultiplier) - 1;
     }
 
     /** Records the outcome of one eligible break. A hit resets the counter; a miss increments it. */

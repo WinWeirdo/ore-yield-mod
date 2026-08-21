@@ -1,5 +1,6 @@
 package com.oreyield.config;
 
+import com.oreyield.block.ProvenanceHostBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -54,6 +55,7 @@ public record OreEntry(String id, boolean enabled, List<String> hosts, String re
     }
 
     public boolean matches(BlockState state, String currentDimension) {
+        state = ProvenanceHostBlocks.canonicalState(state);
         boolean endOverride = isCuratedEndOverride(currentDimension);
         boolean extraDimension = com.oreyield.compat.DimensionManager.isExtraDimension(currentDimension);
         boolean dimensionMatch = dimension.isEmpty() || dimension.equals(currentDimension) || endOverride
@@ -96,8 +98,12 @@ public record OreEntry(String id, boolean enabled, List<String> hosts, String re
     }
 
     public boolean rollsAt(BlockPos pos, RandomSource random, String dimension) {
+        return rollsAt(pos, random, dimension, 1.0D);
+    }
+
+    public boolean rollsAt(BlockPos pos, RandomSource random, String dimension, double chanceMultiplier) {
         if (!canRollAt(pos, dimension)) return false;
-        double adjustedChance = chance;
+        double adjustedChance = chance * Math.max(0.0D, chanceMultiplier);
         if (peakY >= 0 && peakY >= minY && peakY <= maxY && minY != maxY) {
             boolean skipY = isCuratedEndOverride(dimension);
             if (!skipY) {
@@ -106,7 +112,7 @@ public record OreEntry(String id, boolean enabled, List<String> hosts, String re
                         : (double) (maxY - pos.getY() + 1) / (maxY - peakY + 1);
             }
         }
-        return random.nextDouble() < adjustedChance;
+        return random.nextDouble() < Math.min(1.0D, adjustedChance);
     }
 
     public ItemStack createDrop(RandomSource random, int fortuneLevel) {

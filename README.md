@@ -9,6 +9,12 @@ Minecraft mod for **Forge, Fabric, and NeoForge** that makes ores drop from ston
 | Fabric | 1.20.1, 1.21.1, 1.21.11, 26.1.2, 26.2 |
 | NeoForge | 1.21.1, 1.21.11, 26.1.2, 26.2 |
 
+### Documentation
+
+Player and modpack-author documentation lives in [docs/README.md](docs/README.md). The complete, source-generated default reference is [docs/ORE_LOCATIONS.md](docs/ORE_LOCATIONS.md).
+
+Release notes and migration guidance are in [CHANGELOG.md](CHANGELOG.md).
+
 ### Basic Concepts
 
 Ore Yield replaces vanilla ore worldgen. Instead of finding ore blocks in walls, you mine normal stone-like blocks and receive ore drops based on probability.
@@ -28,6 +34,91 @@ Ore Yield replaces vanilla ore worldgen. Instead of finding ore blocks in walls,
 The config screen is available from the Forge and NeoForge title screens ("Ore Yield Config" button). On Fabric, install [Mod Menu](https://modrinth.com/mod/modmenu) to open the config screen from the mod list.
 
 ### Key Settings
+
+### Stone Generator
+
+The Stone Generator is crafted with eight diamonds around one end stone. After each cooldown, it attempts to create a host block immediately above itself: stone in the Overworld, netherrack in the Nether, and end stone in the End. It never replaces an occupied block. Its output is persistently marked, so it can be balanced independently from naturally generated or player-placed host blocks.
+
+It explicitly drops itself only when mined with a **diamond or netherite pickaxe**. Other tools do not drop the block.
+
+The cooldown is editable in the config GUI and in the config file. Recipe ingredients remain file-only:
+
+```toml
+# Default: one server tick (20 ticks = one second)
+stone_generator_cooldown_ticks = 1
+# Default: true. Allows Ore Yield drops from marked generator output.
+generator_ore_yield_enabled = true
+# Default: 0.25. Applied only when the preceding option is true.
+generator_ore_yield_chance_multiplier = 0.25
+# Default: true. Controls Ore Yield rolls on marked player-placed host blocks.
+allow_player_placed_eligible_blocks = true
+# Defaults: false. Protect marked generator output from automation and explosions.
+allow_generator_automated_harvesting = false
+allow_generator_explosion_harvesting = false
+stone_generator_surrounding_item = "minecraft:diamond"
+stone_generator_center_item = "minecraft:end_stone"
+```
+
+For compatibility, existing `stone_generator_interval_ms` values are still read and converted to ticks. Invalid values fall back to one tick.
+
+Forge and NeoForge recognize their loader-provided fake-player classes. Fabric does not provide a loader-wide equivalent, so its non-player destruction path is treated as automation; this safely blocks generator output by default, but enabling Fabric automated harvesting also permits non-player destruction that cannot be classified more precisely.
+
+### Mineral pockets
+
+Mineral pockets are optional rare bonus drops, disabled by default. They are a separate roll after a successful eligible block break: they never advance or use the Bad Luck Eliminator, Fortune never changes their amounts, and explosions never produce them. Pockets work in the Overworld and optionally in the End; the Nether is intentionally excluded.
+
+```toml
+enable_mineral_pockets = false
+mineral_pockets_end_enabled = true
+mineral_pockets_allow_generator = false
+mineral_pockets_allow_automated_harvesting = false
+
+# About one pocket per 4,147 eligible breaks when all five defaults are enabled.
+mineral_pocket_chance = 0.00024112121212121212
+# Metal and gem pockets choose 2–3 installed resource types. The amount below is per type.
+mineral_pocket_min_resource_types = 2
+mineral_pocket_max_resource_types = 3
+
+mineral_pocket_coal_enabled = true
+mineral_pocket_coal_weight = 4147
+mineral_pocket_coal_min_count = 20
+mineral_pocket_coal_max_count = 44
+
+mineral_pocket_metal_enabled = true
+mineral_pocket_metal_weight = 2765
+mineral_pocket_metal_min_count = 7
+mineral_pocket_metal_max_count = 18
+
+mineral_pocket_precious_enabled = true
+mineral_pocket_precious_weight = 1885
+mineral_pocket_precious_min_count = 4
+mineral_pocket_precious_max_count = 9
+
+mineral_pocket_gem_enabled = true
+mineral_pocket_gem_weight = 1037
+mineral_pocket_gem_min_count = 3
+mineral_pocket_gem_max_count = 8
+
+mineral_pocket_ancient_enabled = true
+mineral_pocket_ancient_weight = 166
+mineral_pocket_ancient_min_count = 1
+mineral_pocket_ancient_max_count = 2
+```
+
+The category weights preserve the intended approximate per-break rates: Coal 1/10,000; Metal 1/15,000; Precious 1/22,000; Gem 1/40,000; Ancient 1/250,000. Metal pools use raw iron and copper plus installed Create Zinc and Mekanism Tin/Lead. Gem pools use diamond and emerald plus installed Mekanism Fluorite. A pocket announces itself after its drops are awarded.
+
+### Create and Mekanism compatibility
+
+With `enable_mod_compat_2 = true`, Ore Yield detects Create Zinc and Mekanism Tin, Osmium, Uranium, Fluorite, and Lead only when the corresponding mod is installed. Their Ore Yield definitions are written as editable `[ore.create:zinc]` and `[ore.mekanism:*]` sections in the generated config. No new End variants are added; these entries retain their Overworld profiles.
+
+To replace native compatible ores in **new chunks only**, enable vanilla worldgen removal and leave the compatibility safeguard enabled:
+
+```toml
+remove_vanilla_ore_generation = true
+remove_compatible_ore_generation = true
+```
+
+Only the verified Create Zinc and Mekanism Tin/Osmium/Uranium/Fluorite/Lead placed features are removed. Existing chunks and already-generated ore blocks are unaffected.
 
 #### `remove_vanilla_ore_generation` (default: false)
 - `false` — vanilla ores still generate naturally AND stone blocks yield extra drops

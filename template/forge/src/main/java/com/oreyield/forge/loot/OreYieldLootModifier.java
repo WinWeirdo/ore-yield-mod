@@ -4,6 +4,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.oreyield.config.OreEntry;
 import com.oreyield.loot.BreakRollStore;
+import com.oreyield.loot.BreakContext;
+import com.oreyield.loot.MineralPocketResult;
+import com.oreyield.platform.Services;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ExperienceOrb;
@@ -37,7 +40,10 @@ public final class OreYieldLootModifier extends LootModifier {
         int fortune = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_FORTUNE, tool);
         Player player = context.getParamOrNull(LootContextParams.THIS_ENTITY) instanceof Player p ? p : null;
         if (player != null && player.isCreative()) return generatedLoot;
-        List<OreEntry> hits = BreakRollStore.takeOrRoll(context.getLevel(), pos, state, tool, context.getRandom(), player);
+        boolean explosion = context.hasParam(LootContextParams.EXPLOSION_RADIUS);
+        BreakContext breakContext = explosion ? BreakContext.EXPLOSION
+                : BreakContext.fromPlayer(player != null, player != null && Services.PLATFORM.isFakePlayer(player));
+        List<OreEntry> hits = BreakRollStore.takeOrRoll(context.getLevel(), pos, state, tool, context.getRandom(), player, breakContext);
         int totalXp = 0;
         for (OreEntry hit : hits) {
             if (!hit.meetsPickaxeRequirement(tool, player)) continue;
@@ -45,6 +51,10 @@ public final class OreYieldLootModifier extends LootModifier {
             if (!extra.isEmpty()) generatedLoot.add(extra);
             totalXp += hit.rollXp(context.getRandom());
         }
+        MineralPocketResult pocket = BreakRollStore.takeOrRollMineralPocket(context.getLevel(), pos, state, tool,
+                context.getRandom(), player, breakContext);
+        generatedLoot.addAll(pocket.drops());
+        pocket.announce(player);
         // A global loot modifier runs only while successful block loot is being generated.
         // Keeping XP here prevents canceled BreakEvent attempts from advancing pity or awarding XP.
         if (totalXp > 0 && (player == null || !player.isCreative())) {

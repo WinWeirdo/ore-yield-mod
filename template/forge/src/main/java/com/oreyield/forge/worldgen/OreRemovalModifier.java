@@ -3,6 +3,7 @@ package com.oreyield.forge.worldgen;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.oreyield.config.OreConfig;
+import com.oreyield.compat.CompatibleOreWorldgen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.GenerationStep;
@@ -52,12 +53,9 @@ public record OreRemovalModifier(List<ResourceLocation> featureIds) implements B
         // The data file is the authoritative explicit list of vanilla mineral
         // features.  Do not remove every feature whose name happens to contain
         // "ore" (for example, terrain/decorator features from other mods).
-        if (featureIds.contains(featureId)) return true;
-        if ("minecraft".equals(featureId.getNamespace())) return false;
-
-        // Modded configured features conventionally use an "ore" path segment.
-        // Match only that segment, not arbitrary text such as "forest".
-        String path = featureId.getPath().toLowerCase(java.util.Locale.ROOT);
-        return path.startsWith("ore_") || path.endsWith("_ore") || path.contains("_ore_");
+        if (featureIds.contains(featureId)) return OreConfig.shouldRemoveVanillaOreGeneration();
+        return OreConfig.shouldRemoveVanillaOreGeneration()
+                && OreConfig.shouldRemoveCompatibleOreGeneration()
+                && CompatibleOreWorldgen.isTargetFeature(featureId);
     }
 }

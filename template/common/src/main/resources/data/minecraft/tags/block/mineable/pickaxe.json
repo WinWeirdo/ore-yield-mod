@@ -1,0 +1,12 @@
+//? if singular_data_directories {
+{
+  "replace": false,
+  "values": [
+    "ore_yield:generated_stone", "ore_yield:generated_netherrack", "ore_yield:generated_end_stone",
+    "ore_yield:player_placed_stone", "ore_yield:player_placed_deepslate", "ore_yield:player_placed_tuff",
+    "ore_yield:player_placed_andesite", "ore_yield:player_placed_granite", "ore_yield:player_placed_diorite",
+    "ore_yield:player_placed_calcite", "ore_yield:player_placed_netherrack", "ore_yield:player_placed_blackstone",
+    "ore_yield:player_placed_basalt", "ore_yield:player_placed_smooth_basalt", "ore_yield:player_placed_end_stone"
+  ]
+}
+//?}

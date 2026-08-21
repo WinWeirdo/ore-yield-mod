@@ -10,8 +10,12 @@
 
 Flag legend:
 
+- `block_properties_full_copy` — 1.21.1, 1.21.11, 26.1.2, 26.2
+- `block_properties_require_id` — 1.21.11, 26.1.2, 26.2
 - `break_block_event` — 26.1.2, 26.2
 - `copper_tools_exist` — 1.21.11, 26.1.2, 26.2
+- `crafting_input_api` — 1.21.1, 1.21.11, 26.1.2, 26.2
+- `custom_recipe_serializer_api` — 1.21.11
 - `enchant_helper_stack_first` — never
 - `enchant_holder_api` — 1.21.1, 1.21.11, 26.1.2, 26.2
 - `enchant_iteminstance_api` — 26.1.2, 26.2
@@ -22,7 +26,9 @@ Flag legend:
 - `gui_graphics_argb` — 1.21.11
 - `identifier_renamed` — 1.21.11, 26.1.2, 26.2
 - `item_instance_api` — 26.1.2, 26.2
+- `item_model_definition` — 1.21.11, 26.1.2, 26.2
 - `keymapping_category` — 1.21.11, 26.1.2, 26.2
+- `legacy_crafting_dimensions` — 1.20.1, 1.21.1
 - `level_is_client_side_method` — 1.21.11, 26.1.2, 26.2
 - `loot_context_parameter_api` — 1.21.11, 26.1.2, 26.2
 - `loot_modifier_priority` — 26.1.2, 26.2
@@ -31,6 +37,7 @@ Flag legend:
 - `neoforge_server_data` — 1.21.11, 26.1.2, 26.2
 - `pack_supported_formats` — 1.21.1
 - `player_display_client_message` — 1.21.11
+- `recipe_codec_api` — 26.1.2, 26.2
 - `registry_get_optional` — 1.21.11, 26.1.2, 26.2
 - `registryaccess_lookup` — 1.21.11, 26.1.2, 26.2
 - `render_background_4args` — 1.21.1, 1.21.11, 26.1.2, 26.2
@@ -38,5 +45,6 @@ Flag legend:
 - `resourcelocation_factory_required` — 1.21.1, 1.21.11, 26.1.2, 26.2
 - `screen_extract_render_state` — 26.1.2, 26.2
 - `screen_vanilla_background` — 1.21.1, 1.21.11, 26.1.2, 26.2
+- `singular_data_directories` — 1.21.1, 1.21.11, 26.1.2, 26.2
 - `tier_item_map` — 1.21.1, 1.21.11, 26.1.2, 26.2
 - `window_handle` — 1.21.11, 26.1.2, 26.2

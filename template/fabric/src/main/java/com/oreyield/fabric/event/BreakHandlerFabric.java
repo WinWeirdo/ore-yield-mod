@@ -2,6 +2,9 @@ package com.oreyield.fabric.event;
 
 import com.oreyield.config.OreEntry;
 import com.oreyield.loot.BreakRollStore;
+import com.oreyield.loot.BreakContext;
+import com.oreyield.loot.MineralPocketResult;
+import com.oreyield.platform.Services;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
@@ -34,7 +37,8 @@ public final class BreakHandlerFabric {
         if (player.isCreative()) return;
 
         ItemStack tool = player.getMainHandItem();
-        List<OreEntry> rolls = BreakRollStore.takeOrRoll(level, pos, state, tool, level.getRandom(), player);
+        List<OreEntry> rolls = BreakRollStore.takeOrRoll(level, pos, state, tool, level.getRandom(), player,
+                BreakContext.player(Services.PLATFORM.isFakePlayer(player)));
         LOGGER.debug("[Ore Yield] processed successful player break: block={} dim={} pos={} creative={} tool={} rolls={}",
                 net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock()), level.dimension(), pos,
                 player.isCreative(), tool, rolls.size());
@@ -60,6 +64,12 @@ public final class BreakHandlerFabric {
             }
             totalXp += hit.rollXp(level.getRandom());
         }
+        MineralPocketResult pocket = BreakRollStore.takeOrRollMineralPocket(level, pos, state, tool, level.getRandom(), player,
+                BreakContext.player(Services.PLATFORM.isFakePlayer(player)));
+        for (ItemStack extra : pocket.drops()) {
+            Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, extra);
+        }
+        pocket.announce(player);
         if (totalXp > 0) {
             ExperienceOrb.award(level, Vec3.atCenterOf(pos), totalXp);
         }

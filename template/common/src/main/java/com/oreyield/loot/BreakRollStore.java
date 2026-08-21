@@ -2,6 +2,8 @@ package com.oreyield.loot;
 
 import com.oreyield.config.OreConfig;
 import com.oreyield.config.OreEntry;
+import com.oreyield.block.HostOrigin;
+import com.oreyield.block.ProvenanceHostBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
@@ -11,6 +13,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.ArrayList;
@@ -36,34 +39,79 @@ public final class BreakRollStore {
     }
 
     public static List<OreEntry> takeOrRoll(ServerLevel level, BlockPos pos, BlockState state, ItemStack tool,
-                                             RandomSource random, Player player) {
-        return hasSilkTouch(level, tool) ? List.of() : roll(level, pos, state, random, tool, player);
+                                             RandomSource random, Player player, BreakContext context) {
+        if (!allowsOreYield(state, context)) return List.of();
+        return hasSilkTouch(level, tool) ? List.of() : roll(level, pos, state, random, tool, player, context);
+    }
+
+    /**
+     * Rolls an optional mineral pocket after normal block loot has been accepted.
+     * This path deliberately never advances Bad Luck Eliminator counters or applies Fortune.
+     */
+    public static MineralPocketResult takeOrRollMineralPocket(ServerLevel level, BlockPos pos, BlockState state,
+                                                               ItemStack tool, RandomSource random, Player player,
+                                                               BreakContext context) {
+        if (!OreConfig.isMineralPocketsEnabled() || context.explosion()) return MineralPocketResult.none();
+        if (context.automated() && !OreConfig.allowsMineralPocketAutomatedHarvesting()) return MineralPocketResult.none();
+        if (hasSilkTouch(level, tool)) return MineralPocketResult.none();
+
+        String dimension = getDimension(level);
+        if (!OreConfig.isMineralPocketDimensionEnabled(dimension)) return MineralPocketResult.none();
+
+        HostOrigin origin = ProvenanceHostBlocks.originOf(state);
+        if (origin == HostOrigin.GENERATED && !OreConfig.allowsMineralPocketsOnGenerator()) return MineralPocketResult.none();
+        if (origin == HostOrigin.PLAYER_PLACED && !OreConfig.allowsPlayerPlacedEligibleBlocks()) return MineralPocketResult.none();
+
+        BlockState canonical = ProvenanceHostBlocks.canonicalState(state);
+        if (!isMineralPocketHost(state, canonical, dimension) || !tool.isCorrectToolForDrops(canonical)) {
+            return MineralPocketResult.none();
+        }
+        return MineralPocketRoller.roll(random);
     }
 
     private static List<OreEntry> roll(ServerLevel level, BlockPos pos, BlockState state, RandomSource random,
-                                       ItemStack tool, Player player) {
+                                       ItemStack tool, Player player, BreakContext context) {
         String dimension = getDimension(level);
+        HostOrigin origin = ProvenanceHostBlocks.originOf(state);
+        boolean generatorOutput = origin == HostOrigin.GENERATED;
+        double chanceMultiplier = generatorOutput ? OreConfig.generatorOreYieldChanceMultiplier() : 1.0D;
         List<OreEntry> entries = OreConfig.entriesFor(state, dimension);
         LOGGER.debug("[Ore Yield] roll block={} dim={} pos={} entries={} tool={}",
                 net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock()), dimension, pos,
                 entries.size(), tool);
         List<OreEntry> hits = new ArrayList<>();
         for (OreEntry entry : entries) {
-            boolean hit = entry.rollsAt(pos, random, dimension);
-            boolean eligible = player != null
-                    && BadLuckEliminator.isEligible(entry, state, dimension, pos, tool, player);
-            if (!hit && eligible && BadLuckEliminator.shouldForceDrop(player, entry)) {
+            boolean hit = entry.rollsAt(pos, random, dimension, chanceMultiplier);
+            boolean eligible = player != null && !context.automated()
+                    && BadLuckEliminator.isEligible(entry, state, dimension, pos, tool, player, chanceMultiplier);
+            String counterId = generatorOutput ? entry.id() + "|generator" : entry.id();
+            if (!hit && eligible && BadLuckEliminator.shouldForceDrop(player, counterId, entry, chanceMultiplier)) {
                 hit = true;
             }
             if (hit) hits.add(entry);
             if (eligible) {
-                BadLuckEliminator.advance(player, entry.id(), hit);
+                BadLuckEliminator.advance(player, counterId, hit);
             }
         }
         if (!hits.isEmpty()) {
             LOGGER.debug("[Ore Yield] roll hits={}", hits.stream().map(OreEntry::id).toList());
         }
         return List.copyOf(hits);
+    }
+
+    private static boolean allowsOreYield(BlockState state, BreakContext context) {
+        HostOrigin origin = ProvenanceHostBlocks.originOf(state);
+        if (origin == HostOrigin.PLAYER_PLACED) {
+            return OreConfig.allowsPlayerPlacedEligibleBlocks();
+        }
+        if (origin != HostOrigin.GENERATED || !OreConfig.isGeneratorOreYieldEnabled()) return origin != HostOrigin.GENERATED;
+        if (context.explosion()) return OreConfig.allowsGeneratorExplosionHarvesting();
+        return !context.automated() || OreConfig.allowsGeneratorAutomatedHarvesting();
+    }
+
+    private static boolean isMineralPocketHost(BlockState state, BlockState canonical, String dimension) {
+        if ("minecraft:the_end".equals(dimension)) return canonical.is(Blocks.END_STONE);
+        return "minecraft:overworld".equals(dimension) && !OreConfig.entriesFor(state, dimension).isEmpty();
     }
 
     private static String getDimension(ServerLevel level) {

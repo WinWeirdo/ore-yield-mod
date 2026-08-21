@@ -1,5 +1,6 @@
 package com.oreyield.config;
 
+import com.oreyield.compat.ModCompat2Manager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,6 +57,7 @@ public final class OreConfigIO {
             }
 
             OreConfig.setValue("remove_vanilla_ore_generation", bool(top, "remove_vanilla_ore_generation", false));
+            OreConfig.setValue("remove_compatible_ore_generation", bool(top, "remove_compatible_ore_generation", true));
             OreConfig.setValue("enable_mod_compat", bool(top, "enable_mod_compat", false));
             OreConfig.setValue("enable_mod_compat_2", bool(top, "enable_mod_compat_2", true));
             OreConfig.setValue("mod_compat_2_ores_in_end", bool(top, "mod_compat_2_ores_in_end", true));
@@ -63,6 +65,31 @@ public final class OreConfigIO {
             OreConfig.setValue("auto_detect_dimensions", bool(top, "auto_detect_dimensions", true));
             OreConfig.setValue("bad_luck_eliminator", bool(top, "bad_luck_eliminator", true));
             OreConfig.setValue("bad_luck_multiplier", decimal(top, "bad_luck_multiplier", 2.0D));
+            OreConfig.setValue("enable_mineral_pockets", bool(top, "enable_mineral_pockets", false));
+            OreConfig.setValue("mineral_pockets_end_enabled", bool(top, "mineral_pockets_end_enabled", true));
+            OreConfig.setValue("mineral_pockets_allow_generator", bool(top, "mineral_pockets_allow_generator", false));
+            OreConfig.setValue("mineral_pockets_allow_automated_harvesting", bool(top, "mineral_pockets_allow_automated_harvesting", false));
+            OreConfig.setValue("mineral_pocket_chance", decimal(top, "mineral_pocket_chance", 0.00024112121212121212D));
+            OreConfig.setMineralPocketResourceTypeRange(
+                    integer(top, "mineral_pocket_min_resource_types", 2),
+                    integer(top, "mineral_pocket_max_resource_types", 3));
+            for (MineralPocketType type : MineralPocketType.values()) {
+                MineralPocketSettings defaults = OreConfig.defaultMineralPocketSettings(type);
+                String prefix = "mineral_pocket_" + type.configKey() + "_";
+                OreConfig.setMineralPocketSettings(type,
+                        bool(top, prefix + "enabled", defaults.enabled()),
+                        integer(top, prefix + "weight", defaults.weight()),
+                        integer(top, prefix + "min_count", defaults.minCount()),
+                        integer(top, prefix + "max_count", defaults.maxCount()));
+            }
+            OreConfig.setValue("generator_ore_yield_enabled", bool(top, "generator_ore_yield_enabled", true));
+            OreConfig.setValue("generator_ore_yield_chance_multiplier", decimal(top, "generator_ore_yield_chance_multiplier", 0.25D));
+            OreConfig.setValue("allow_player_placed_eligible_blocks", bool(top, "allow_player_placed_eligible_blocks", true));
+            OreConfig.setValue("allow_generator_automated_harvesting", bool(top, "allow_generator_automated_harvesting", false));
+            OreConfig.setValue("allow_generator_explosion_harvesting", bool(top, "allow_generator_explosion_harvesting", false));
+            loadStoneGeneratorCooldown(top);
+            OreConfig.setStoneGeneratorRecipeItems(string(top, "stone_generator_surrounding_item", "minecraft:diamond"),
+                    string(top, "stone_generator_center_item", "minecraft:end_stone"));
             OreConfig.setEnabledDimensions(strList(top, "enabled_dimensions", List.of()));
             OreConfig.setAutoDetectedDimensions(strList(top, "auto_detected_dimensions", List.of()));
             OreConfig.setAdditionalOres(strList(top, "additional_ores", List.of()));
@@ -80,6 +107,8 @@ public final class OreConfigIO {
         sb.append("# Ore Yield configuration\n");
         sb.append("# Set by the in-game config screen or edit manually, then use \"Reload from File\".\n\n");
         line(sb, "remove_vanilla_ore_generation", OreConfig.shouldRemoveVanillaOreGeneration());
+        sb.append("# With vanilla worldgen removal enabled, applies only to exact Create/Mekanism 1.20.1 ore features.\n");
+        line(sb, "remove_compatible_ore_generation", OreConfig.shouldRemoveCompatibleOreGeneration());
         line(sb, "enable_mod_compat", OreConfig.isModCompatEnabled());
         line(sb, "enable_mod_compat_2", OreConfig.isModCompat2Enabled());
         line(sb, "mod_compat_2_ores_in_end", OreConfig.isModCompat2OresInEnd());
@@ -87,6 +116,34 @@ public final class OreConfigIO {
         line(sb, "auto_detect_dimensions", OreConfig.isAutoDetectDimensionsEnabled());
         line(sb, "bad_luck_eliminator", OreConfig.isBadLuckEliminatorEnabled());
         line(sb, "bad_luck_multiplier", OreConfig.badLuckMultiplier());
+        sb.append("# Rare mineral pockets are separate from normal ore rolls and never use Bad Luck Eliminator or Fortune.\n");
+        sb.append("# They are disabled by default. The Nether is intentionally excluded.\n");
+        line(sb, "enable_mineral_pockets", OreConfig.isMineralPocketsEnabled());
+        line(sb, "mineral_pockets_end_enabled", OreConfig.isMineralPocketsInEndEnabled());
+        sb.append("# Marked Stone Generator output and non-player harvesting remain disabled by default. Explosions never roll pockets.\n");
+        line(sb, "mineral_pockets_allow_generator", OreConfig.allowsMineralPocketsOnGenerator());
+        line(sb, "mineral_pockets_allow_automated_harvesting", OreConfig.allowsMineralPocketAutomatedHarvesting());
+        sb.append("# Master chance is approximately one pocket per 4,147 eligible breaks when all category weights are enabled.\n");
+        line(sb, "mineral_pocket_chance", OreConfig.mineralPocketChance());
+        sb.append("# Metal and gem pockets choose this many distinct installed resources. Counts below apply to each selected resource.\n");
+        line(sb, "mineral_pocket_min_resource_types", OreConfig.mineralPocketMinResourceTypes());
+        line(sb, "mineral_pocket_max_resource_types", OreConfig.mineralPocketMaxResourceTypes());
+        for (MineralPocketType type : MineralPocketType.values()) appendMineralPocket(sb, type);
+        sb.append("\n");
+        sb.append("# Stone Generator: cooldown in server ticks (20 ticks = one second).\n");
+        line(sb, "stone_generator_cooldown_ticks", OreConfig.stoneGeneratorCooldownTicks());
+        sb.append("# Generator output is tracked separately from world blocks and rolls Ore Yield rewards by default.\n");
+        line(sb, "generator_ore_yield_enabled", OreConfig.isGeneratorOreYieldEnabled());
+        sb.append("# Applied only to marked generator output when generator ore yield is enabled.\n");
+        line(sb, "generator_ore_yield_chance_multiplier", OreConfig.generatorOreYieldChanceMultiplier());
+        sb.append("# Player-placed eligible host blocks keep normal Ore Yield behavior by default.\n");
+        line(sb, "allow_player_placed_eligible_blocks", OreConfig.allowsPlayerPlacedEligibleBlocks());
+        sb.append("# Protect marked generator output from automation and explosions by default.\n");
+        line(sb, "allow_generator_automated_harvesting", OreConfig.allowsGeneratorAutomatedHarvesting());
+        line(sb, "allow_generator_explosion_harvesting", OreConfig.allowsGeneratorExplosionHarvesting());
+        sb.append("# Recipe-only settings; intentionally not shown in the in-game config screen.\n");
+        sb.append("stone_generator_surrounding_item = \"").append(OreConfig.stoneGeneratorSurroundingItem()).append("\"\n");
+        sb.append("stone_generator_center_item = \"").append(OreConfig.stoneGeneratorCenterItem()).append("\"\n");
         sb.append("\n");
         sb.append("# Dimensions where the overworld ore set also drops (only active while auto detection is on).\n");
         sb.append("# Edit this list to pin a dimension or prune an auto-detected one.\n");
@@ -97,24 +154,9 @@ public final class OreConfigIO {
         sb.append("additional_ores = ").append(toTomlList(OreConfig.getAdditionalOres())).append("\n");
         sb.append("# One entry per modded ore: id|enabled|result_item|min_count|max_count|chance|min_y|max_y|peak_y|fortune_type|xp_min|xp_max|dimension|host1,host2|min_pickaxe_level\n\n");
 
-        for (OreEntry entry : OreConfig.defaultEntries().values()) {
-            OreEntry effective = OreConfig.effectiveEntry(entry.id());
-            sb.append("[ore.").append(effective.id()).append("]\n");
-            line(sb, "enabled", effective.enabled());
-            sb.append("host_blocks = ").append(toTomlList(effective.hosts())).append("\n");
-            sb.append("result_item = \"").append(effective.resultItem()).append("\"\n");
-            sb.append("min_count = ").append(effective.minCount()).append("\n");
-            sb.append("max_count = ").append(effective.maxCount()).append("\n");
-            sb.append("chance = ").append(effective.chance()).append("\n");
-            sb.append("min_y = ").append(effective.minY()).append("\n");
-            sb.append("max_y = ").append(effective.maxY()).append("\n");
-            sb.append("peak_y = ").append(effective.peakY()).append("\n");
-            sb.append("fortune_type = \"").append(effective.fortuneType().name()).append("\"\n");
-            sb.append("xp_min = ").append(effective.xpMin()).append("\n");
-            sb.append("xp_max = ").append(effective.xpMax()).append("\n");
-            sb.append("dimension = \"").append(effective.dimension()).append("\"\n");
-            sb.append("min_pickaxe_level = ").append(effective.minPickaxeLevel()).append("\n\n");
-        }
+        for (OreEntry entry : OreConfig.defaultEntries().values()) appendOre(sb, OreConfig.effectiveEntry(entry.id()));
+        sb.append("# Optional Create/Mekanism 1.20.1 entries. They activate only when the relevant mod is installed.\n\n");
+        for (OreEntry entry : ModCompat2Manager.phaseTwoDefaults()) appendOre(sb, OreConfig.effectiveEntry(entry.id()));
 
         try {
             Path parent = configFile.getParent();
@@ -139,6 +181,34 @@ public final class OreConfigIO {
         sb.append(key).append(" = ").append(value).append("\n");
     }
 
+    private static void appendMineralPocket(StringBuilder sb, MineralPocketType type) {
+        MineralPocketSettings settings = OreConfig.mineralPocketSettings(type);
+        String prefix = "mineral_pocket_" + type.configKey() + "_";
+        line(sb, prefix + "enabled", settings.enabled());
+        line(sb, prefix + "weight", settings.weight());
+        line(sb, prefix + "min_count", settings.minCount());
+        line(sb, prefix + "max_count", settings.maxCount());
+    }
+
+    private static void appendOre(StringBuilder sb, OreEntry entry) {
+        if (entry == null) return;
+        sb.append("[ore.").append(entry.id()).append("]\n");
+        line(sb, "enabled", entry.enabled());
+        sb.append("host_blocks = ").append(toTomlList(entry.hosts())).append("\n");
+        sb.append("result_item = \"").append(entry.resultItem()).append("\"\n");
+        sb.append("min_count = ").append(entry.minCount()).append("\n");
+        sb.append("max_count = ").append(entry.maxCount()).append("\n");
+        sb.append("chance = ").append(entry.chance()).append("\n");
+        sb.append("min_y = ").append(entry.minY()).append("\n");
+        sb.append("max_y = ").append(entry.maxY()).append("\n");
+        sb.append("peak_y = ").append(entry.peakY()).append("\n");
+        sb.append("fortune_type = \"").append(entry.fortuneType().name()).append("\"\n");
+        sb.append("xp_min = ").append(entry.xpMin()).append("\n");
+        sb.append("xp_max = ").append(entry.xpMax()).append("\n");
+        sb.append("dimension = \"").append(entry.dimension()).append("\"\n");
+        sb.append("min_pickaxe_level = ").append(entry.minPickaxeLevel()).append("\n\n");
+    }
+
     private static String toTomlList(List<String> values) {
         if (values.isEmpty()) return "[]";
         List<String> quoted = values.stream().map(v -> "\"" + v + "\"").toList();
@@ -159,6 +229,51 @@ public final class OreConfigIO {
         } catch (NumberFormatException e) {
             return def;
         }
+    }
+
+    private static long longValue(Map<String, String> map, String key, long def) {
+        String value = map.get(key);
+        if (value == null) return def;
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            LOGGER.warn("[Ore Yield] Invalid {}='{}'; using {}.", key, value, def);
+            return def;
+        }
+    }
+
+    private static int integer(Map<String, String> map, String key, int def) {
+        String value = map.get(key);
+        if (value == null) return def;
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e) {
+            LOGGER.warn("[Ore Yield] Invalid {}='{}'; using {}.", key, value, def);
+            return def;
+        }
+    }
+
+    private static void loadStoneGeneratorCooldown(Map<String, String> top) {
+        if (top.containsKey("stone_generator_cooldown_ticks")) {
+            OreConfig.setStoneGeneratorCooldownTicks(longValue(top, "stone_generator_cooldown_ticks", 1L));
+            return;
+        }
+        // Accept the natural shorter spelling too, then migrate it to the canonical key on the next save.
+        if (top.containsKey("stone_generator_cooldown")) {
+            OreConfig.setStoneGeneratorCooldownTicks(longValue(top, "stone_generator_cooldown", 1L));
+            return;
+        }
+        // Compatibility with the original proof-of-concept setting.
+        OreConfig.setStoneGeneratorIntervalMillis(longValue(top, "stone_generator_interval_ms", 50L));
+    }
+
+    private static String string(Map<String, String> map, String key, String def) {
+        String value = map.get(key);
+        if (value == null) return def;
+        if (value.startsWith("\"") && value.endsWith("\"") && value.length() >= 2) {
+            return value.substring(1, value.length() - 1);
+        }
+        return value;
     }
 
     private static List<String> strList(Map<String, String> map, String key, List<String> def) {

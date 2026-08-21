@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,12 +21,28 @@ public final class OreConfig {
 
     private static volatile Path configPath;
     private static volatile boolean removeVanillaOreGeneration = false;
+    private static volatile boolean removeCompatibleOreGeneration = true;
     private static volatile boolean enableModCompat = false;
     private static volatile boolean enableModCompat2 = true;
     private static volatile boolean modCompat2OresInEnd = true;
     private static volatile boolean enableVanillaEndOres = true;
     private static volatile boolean badLuckEliminator = true;
     private static volatile double badLuckMultiplier = 2.0D;
+    private static volatile int stoneGeneratorCooldownTicks = 1;
+    private static volatile boolean generatorOreYieldEnabled = true;
+    private static volatile double generatorOreYieldChanceMultiplier = 0.25D;
+    private static volatile boolean allowPlayerPlacedEligibleBlocks = true;
+    private static volatile boolean allowGeneratorAutomatedHarvesting = false;
+    private static volatile boolean allowGeneratorExplosionHarvesting = false;
+    private static volatile boolean mineralPocketsEnabled = false;
+    private static volatile boolean mineralPocketsInEnd = true;
+    private static volatile boolean mineralPocketsOnGenerator = false;
+    private static volatile boolean mineralPocketsAutomatedHarvesting = false;
+    private static volatile double mineralPocketChance = 0.00024112121212121212D;
+    private static volatile int mineralPocketMinResourceTypes = 2;
+    private static volatile int mineralPocketMaxResourceTypes = 3;
+    private static volatile String stoneGeneratorSurroundingItem = "minecraft:diamond";
+    private static volatile String stoneGeneratorCenterItem = "minecraft:end_stone";
     private static volatile boolean autoDetectDimensions = true;
     private static volatile List<String> enabledDimensions = List.of();
     private static volatile List<String> autoDetectedDimensions = List.of();
@@ -34,6 +51,8 @@ public final class OreConfig {
 
     private static final Map<String, OreEntry> DEFAULT_ENTRIES = new LinkedHashMap<>();
     private static final Map<String, OreEntry> OVERRIDES = new LinkedHashMap<>();
+    private static final Map<MineralPocketType, MineralPocketSettings> DEFAULT_MINERAL_POCKETS = new EnumMap<>(MineralPocketType.class);
+    private static final Map<MineralPocketType, MineralPocketSettings> MINERAL_POCKETS = new EnumMap<>(MineralPocketType.class);
 
     static {
         String ow = "#forge:overworld_ore_bearing_stones";
@@ -67,6 +86,15 @@ public final class OreConfig {
         add("end_emerald", new OreEntry("end_emerald", true, List.of(es), "minecraft:emerald", 1, 1, 0.003, 0, 320, -1, FortuneType.ORE, 3, 7, enDim, 2));
         add("end_nether_quartz", new OreEntry("end_nether_quartz", true, List.of(es), "minecraft:quartz", 1, 1, 0.024, 0, 320, -1, FortuneType.ORE, 2, 5, enDim, 0));
         add("end_nether_gold", new OreEntry("end_nether_gold", true, List.of(es), "minecraft:gold_nugget", 2, 6, 0.011, 0, 320, -1, FortuneType.ORE, 0, 0, enDim, 0));
+
+        // The values below preserve the approved per-category rates when combined
+        // with mineral_pocket_chance. Counts are per selected resource type.
+        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.COAL, new MineralPocketSettings(true, 4147, 20, 44));
+        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.METAL, new MineralPocketSettings(true, 2765, 7, 18));
+        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.PRECIOUS, new MineralPocketSettings(true, 1885, 4, 9));
+        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.GEM, new MineralPocketSettings(true, 1037, 3, 8));
+        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.ANCIENT, new MineralPocketSettings(true, 166, 1, 2));
+        MINERAL_POCKETS.putAll(DEFAULT_MINERAL_POCKETS);
     }
 
     private OreConfig() {}
@@ -88,7 +116,9 @@ public final class OreConfig {
     }
 
     public static OreEntry effectiveEntry(String id) {
-        return OVERRIDES.getOrDefault(id, DEFAULT_ENTRIES.get(id));
+        OreEntry base = DEFAULT_ENTRIES.get(id);
+        if (base == null) base = ModCompat2Manager.defaultEntry(id);
+        return OVERRIDES.getOrDefault(id, base);
     }
 
     /** Drops all previously loaded [ore.*] section overrides (called when (re)reading the config file). */
@@ -98,6 +128,11 @@ public final class OreConfig {
 
     public static boolean shouldRemoveVanillaOreGeneration() {
         return removeVanillaOreGeneration;
+    }
+
+    /** Additional safeguard for exact Create/Mekanism removal under worldgen replacement. */
+    public static boolean shouldRemoveCompatibleOreGeneration() {
+        return removeCompatibleOreGeneration;
     }
 
     public static boolean isModCompatEnabled() {
@@ -148,6 +183,143 @@ public final class OreConfig {
         return badLuckMultiplier;
     }
 
+    /** Generator cooldown in server ticks (20 ticks = one second). */
+    public static int stoneGeneratorCooldownTicks() {
+        return stoneGeneratorCooldownTicks;
+    }
+
+    public static boolean isGeneratorOreYieldEnabled() {
+        return generatorOreYieldEnabled;
+    }
+
+    public static double generatorOreYieldChanceMultiplier() {
+        return generatorOreYieldChanceMultiplier;
+    }
+
+    public static boolean allowsPlayerPlacedEligibleBlocks() {
+        return allowPlayerPlacedEligibleBlocks;
+    }
+
+    public static boolean allowsGeneratorAutomatedHarvesting() {
+        return allowGeneratorAutomatedHarvesting;
+    }
+
+    public static boolean allowsGeneratorExplosionHarvesting() {
+        return allowGeneratorExplosionHarvesting;
+    }
+
+    public static boolean isMineralPocketsEnabled() {
+        return mineralPocketsEnabled;
+    }
+
+    public static boolean isMineralPocketsInEndEnabled() {
+        return mineralPocketsInEnd;
+    }
+
+    public static boolean allowsMineralPocketsOnGenerator() {
+        return mineralPocketsOnGenerator;
+    }
+
+    public static boolean allowsMineralPocketAutomatedHarvesting() {
+        return mineralPocketsAutomatedHarvesting;
+    }
+
+    public static double mineralPocketChance() {
+        return mineralPocketChance;
+    }
+
+    public static int mineralPocketMinResourceTypes() {
+        return mineralPocketMinResourceTypes;
+    }
+
+    public static int mineralPocketMaxResourceTypes() {
+        return mineralPocketMaxResourceTypes;
+    }
+
+    public static MineralPocketSettings mineralPocketSettings(MineralPocketType type) {
+        return MINERAL_POCKETS.get(type);
+    }
+
+    public static MineralPocketSettings defaultMineralPocketSettings(MineralPocketType type) {
+        return DEFAULT_MINERAL_POCKETS.get(type);
+    }
+
+    public static boolean isMineralPocketDimensionEnabled(String dimension) {
+        return "minecraft:overworld".equals(dimension)
+                || ("minecraft:the_end".equals(dimension) && mineralPocketsInEnd);
+    }
+
+    public static void setMineralPocketSettings(MineralPocketType type, boolean enabled, int weight, int minCount, int maxCount) {
+        int safeWeight = Math.max(0, Math.min(1_000_000, weight));
+        int safeMin = Math.max(1, Math.min(64, minCount));
+        int safeMax = Math.max(safeMin, Math.min(64, maxCount));
+        if (safeWeight != weight || safeMin != minCount || safeMax != maxCount) {
+            LOGGER.warn("[Ore Yield] Mineral pocket '{}' values were clamped to weight={}, min_count={}, max_count={}.",
+                    type.configKey(), safeWeight, safeMin, safeMax);
+        }
+        MINERAL_POCKETS.put(type, new MineralPocketSettings(enabled, safeWeight, safeMin, safeMax));
+    }
+
+    public static void setMineralPocketChance(double value) {
+        if (!Double.isFinite(value)) {
+            LOGGER.warn("[Ore Yield] Ignoring non-finite mineral_pocket_chance: {}", value);
+            return;
+        }
+        mineralPocketChance = Math.max(0.0D, Math.min(1.0D, value));
+    }
+
+    public static void setMineralPocketResourceTypeRange(int minTypes, int maxTypes) {
+        int safeMin = Math.max(1, Math.min(16, minTypes));
+        int safeMax = Math.max(safeMin, Math.min(16, maxTypes));
+        if (safeMin != minTypes || safeMax != maxTypes) {
+            LOGGER.warn("[Ore Yield] Mineral pocket resource-type range {}..{} was clamped to {}..{}.",
+                    minTypes, maxTypes, safeMin, safeMax);
+        }
+        mineralPocketMinResourceTypes = safeMin;
+        mineralPocketMaxResourceTypes = safeMax;
+    }
+
+    public static String stoneGeneratorSurroundingItem() {
+        return stoneGeneratorSurroundingItem;
+    }
+
+    public static String stoneGeneratorCenterItem() {
+        return stoneGeneratorCenterItem;
+    }
+
+    public static void setStoneGeneratorCooldownTicks(long value) {
+        if (value < 1L || value > 1_728_000L) {
+            LOGGER.warn("[Ore Yield] stone_generator_cooldown_ticks={} is outside 1..1728000; using 1 tick.", value);
+            stoneGeneratorCooldownTicks = 1;
+            return;
+        }
+        stoneGeneratorCooldownTicks = (int) value;
+    }
+
+    /**
+     * Backward-compatible reader for the unreleased millisecond config spelling.
+     * Minecraft schedules block ticks, so a partial tick is rounded up.
+     */
+    public static void setStoneGeneratorIntervalMillis(long value) {
+        if (value < 1L || value > 86_400_000L) {
+            LOGGER.warn("[Ore Yield] stone_generator_interval_ms={} is outside 1..86400000; using 1 tick.", value);
+            stoneGeneratorCooldownTicks = 1;
+            return;
+        }
+        setStoneGeneratorCooldownTicks((value + 49L) / 50L);
+    }
+
+    public static void setStoneGeneratorRecipeItems(String surrounding, String center) {
+        stoneGeneratorSurroundingItem = validItemId(surrounding) ? surrounding : "minecraft:diamond";
+        stoneGeneratorCenterItem = validItemId(center) ? center : "minecraft:end_stone";
+        if (!stoneGeneratorSurroundingItem.equals(surrounding)) {
+            LOGGER.warn("[Ore Yield] Invalid stone_generator_surrounding_item '{}'; using minecraft:diamond.", surrounding);
+        }
+        if (!stoneGeneratorCenterItem.equals(center)) {
+            LOGGER.warn("[Ore Yield] Invalid stone_generator_center_item '{}'; using minecraft:end_stone.", center);
+        }
+    }
+
     public static List<String> getAdditionalOres() {
         return additionalOres;
     }
@@ -185,7 +357,7 @@ public final class OreConfig {
                 // Curated data wins over a generic auto-detection, but never over
                 // an explicit default override or additional_ores entry.
                 if (!explicitIds.contains(entry.id())) {
-                    loaded.put(entry.id(), entry);
+                    loaded.put(entry.id(), OVERRIDES.getOrDefault(entry.id(), entry));
                 }
             }
         }
@@ -196,12 +368,21 @@ public final class OreConfig {
     public static void setValue(String key, boolean value) {
         switch (key) {
             case "remove_vanilla_ore_generation" -> removeVanillaOreGeneration = value;
+            case "remove_compatible_ore_generation" -> removeCompatibleOreGeneration = value;
             case "enable_mod_compat" -> enableModCompat = value;
             case "enable_mod_compat_2" -> enableModCompat2 = value;
             case "mod_compat_2_ores_in_end" -> modCompat2OresInEnd = value;
             case "enable_vanilla_end_ores" -> enableVanillaEndOres = value;
             case "auto_detect_dimensions" -> autoDetectDimensions = value;
             case "bad_luck_eliminator" -> badLuckEliminator = value;
+            case "generator_ore_yield_enabled" -> generatorOreYieldEnabled = value;
+            case "allow_player_placed_eligible_blocks" -> allowPlayerPlacedEligibleBlocks = value;
+            case "allow_generator_automated_harvesting" -> allowGeneratorAutomatedHarvesting = value;
+            case "allow_generator_explosion_harvesting" -> allowGeneratorExplosionHarvesting = value;
+            case "enable_mineral_pockets" -> mineralPocketsEnabled = value;
+            case "mineral_pockets_end_enabled" -> mineralPocketsInEnd = value;
+            case "mineral_pockets_allow_generator" -> mineralPocketsOnGenerator = value;
+            case "mineral_pockets_allow_automated_harvesting" -> mineralPocketsAutomatedHarvesting = value;
             default -> LOGGER.warn("[Ore Yield] Unknown boolean config key: {}", key);
         }
     }
@@ -213,6 +394,14 @@ public final class OreConfig {
                 return;
             }
             badLuckMultiplier = Math.max(1.0D, value);
+        } else if ("generator_ore_yield_chance_multiplier".equals(key)) {
+            if (!Double.isFinite(value)) {
+                LOGGER.warn("[Ore Yield] Ignoring non-finite generator_ore_yield_chance_multiplier: {}", value);
+                return;
+            }
+            generatorOreYieldChanceMultiplier = Math.max(0.0D, Math.min(100.0D, value));
+        } else if ("mineral_pocket_chance".equals(key)) {
+            setMineralPocketChance(value);
         } else {
             LOGGER.warn("[Ore Yield] Unknown numeric config key: {}", key);
         }
@@ -236,6 +425,7 @@ public final class OreConfig {
 
     public static void applyOverrides(String id, Map<String, String> values) {
         OreEntry base = DEFAULT_ENTRIES.get(id);
+        if (base == null) base = ModCompat2Manager.defaultEntry(id);
         if (base == null) {
             LOGGER.warn("[Ore Yield] Unknown ore section [ore.{}] in config; ignored.", id);
             return;
@@ -299,6 +489,10 @@ public final class OreConfig {
     private static double decimal(Map<String, String> values, String key, double def) {
         String v = values.get(key);
         return v == null ? def : Double.parseDouble(v);
+    }
+
+    private static boolean validItemId(String value) {
+        return value != null && value.matches("[a-z0-9_.-]+:[a-z0-9_./-]+");
     }
 
     private static double normalizedChance(String id, double value) {

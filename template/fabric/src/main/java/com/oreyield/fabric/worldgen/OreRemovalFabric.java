@@ -1,27 +1,24 @@
 package com.oreyield.fabric.worldgen;
 
 import com.oreyield.config.OreConfig;
+import com.oreyield.compat.CompatibleOreWorldgen;
 import com.oreyield.util.ResourceLocations;
 import net.fabricmc.fabric.api.biome.v1.BiomeModification;
 import net.fabricmc.fabric.api.biome.v1.BiomeModificationContext;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
 import java.util.List;
 
 public final class OreRemovalFabric {
     private static final Logger LOGGER = LoggerFactory.getLogger("ore_yield/WorldGen");
-    private static final List<ResourceLocation> FEATURE_IDS = List.of(
+    private static final List<ResourceLocation> VANILLA_FEATURE_IDS = List.of(
             ResourceLocations.of("minecraft", "ore_coal_upper"),
             ResourceLocations.of("minecraft", "ore_coal_lower"),
             ResourceLocations.of("minecraft", "ore_iron_upper"),
@@ -54,64 +51,23 @@ public final class OreRemovalFabric {
     public static void register() {
         BiomeModifications.create(ResourceLocations.of("ore_yield", "remove_vanilla_ores"))
                 .add(ModificationPhase.REMOVALS, BiomeSelectors.all(), (BiomeModificationContext context) -> {
-                    if (!OreConfig.shouldRemoveVanillaOreGeneration()) return;
                     BiomeModificationContext.GenerationSettingsContext settings = context.getGenerationSettings();
-                    for (ResourceLocation id : FEATURE_IDS) {
-                        try {
-                            settings.removeFeature(ResourceKey.create(Registries.PLACED_FEATURE, id));
-                        } catch (IllegalArgumentException e) {
-                            LOGGER.warn("[Ore Yield] Skipping feature removal for {}: not present in the placed feature registry.", id, e);
-                        }
+                    if (!OreConfig.shouldRemoveVanillaOreGeneration()) return;
+                    removeFeatures(settings, VANILLA_FEATURE_IDS);
+                    if (OreConfig.shouldRemoveCompatibleOreGeneration()) {
+                        removeFeatures(settings, CompatibleOreWorldgen.featuresToRemove());
                     }
-                    removeOreFeatures(settings, context);
                 });
     }
 
-    /**
-     * Removes explicitly named vanilla mineral features and narrowly named modded ore
-     * features.  The previous substring match removed unrelated generation such as
-     * forest and terrain features whose identifiers happened to contain "ore".
-     * Fabric's API only removes features by explicit key, so the placed feature registry is
-     * read from the modification context via reflection. Falls back to the vanilla list only
-     * if the internal API changes.
-     */
-    private static void removeOreFeatures(BiomeModificationContext.GenerationSettingsContext settings,
-                                          BiomeModificationContext context) {
-        Registry<PlacedFeature> registry;
-        try {
-            registry = getPlacedFeatureRegistry(context);
-        } catch (ReflectiveOperationException | RuntimeException e) {
-            LOGGER.warn("[Ore Yield] Could not enumerate placed features for modded ore removal ({}); only the vanilla list is removed.", e.getMessage());
-            return;
-        }
-        for (ResourceKey<PlacedFeature> key : registry.registryKeySet()) {
-            if (isModdedOreFeature(key)) {
-                settings.removeFeature(key);
+    private static void removeFeatures(BiomeModificationContext.GenerationSettingsContext settings,
+                                       List<ResourceLocation> featureIds) {
+        for (ResourceLocation id : featureIds) {
+            try {
+                settings.removeFeature(ResourceKey.create(Registries.PLACED_FEATURE, id));
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn("[Ore Yield] Skipping feature removal for {}: not present in the placed feature registry.", id, e);
             }
         }
-    }
-
-    private static boolean isModdedOreFeature(ResourceKey<PlacedFeature> key) {
-        //? if resourcekey_identifier {
-        ResourceLocation id = key.identifier();
-        //?} else {
-        ResourceLocation id = key.location();
-        //?}
-        if (id.getNamespace().equals("minecraft")) return false;
-
-        String path = id.getPath();
-        return path.startsWith("ore_") || path.endsWith("_ore") || path.startsWith("ores/");
-    }
-
-    private static Registry<PlacedFeature> getPlacedFeatureRegistry(BiomeModificationContext context)
-            throws ReflectiveOperationException {
-        Field field = context.getClass().getDeclaredField("registries");
-        field.setAccessible(true);
-        RegistryAccess registries = (RegistryAccess) field.get(context);
-        //? if registryaccess_lookup {
-        return registries.lookupOrThrow(Registries.PLACED_FEATURE);
-        //?} else {
-        return registries.registryOrThrow(Registries.PLACED_FEATURE);
-        //?}
     }
 }

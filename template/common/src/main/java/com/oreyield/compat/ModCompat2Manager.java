@@ -66,6 +66,21 @@ public final class ModCompat2Manager {
 
     private static final List<OreSpec> ORE_SPECS = List.of(
             // Overworld
+            // Create 6.0.8-289 (Minecraft 1.20.1): its only native ore placed feature is create:zinc_ore.
+            new OreSpec("create:zinc_ore", "create:raw_zinc", 1,
+                    OW_DIM, OW_HOSTS, 1, 1, 0.015, -63, 70, -1, FortuneType.ORE),
+            // Mekanism 10.4.16.80 (Minecraft 1.20.1). Native ore blocks have no needs_* tool tag;
+            // minPickaxeLevel 0 therefore preserves their vanilla harvest tier in Ore Yield's scale.
+            new OreSpec("mekanism:tin_ore", "mekanism:raw_tin", 0,
+                    OW_DIM, OW_HOSTS, 1, 1, 0.030, -32, 94, 20, FortuneType.ORE),
+            new OreSpec("mekanism:osmium_ore", "mekanism:raw_osmium", 0,
+                    OW_DIM, OW_HOSTS, 1, 1, 0.035, -64, 320, 208, FortuneType.ORE),
+            new OreSpec("mekanism:uranium_ore", "mekanism:raw_uranium", 0,
+                    OW_DIM, OW_HOSTS, 1, 1, 0.011, -64, 8, -40, FortuneType.ORE),
+            new OreSpec("mekanism:fluorite_ore", "mekanism:fluorite_gem", 0,
+                    OW_DIM, OW_HOSTS, 2, 4, 0.010, -64, 23, -30, FortuneType.ORE, 1, 4),
+            new OreSpec("mekanism:lead_ore", "mekanism:raw_lead", 0,
+                    OW_DIM, OW_HOSTS, 1, 1, 0.014, -64, 64, -12, FortuneType.ORE),
             new OreSpec("iceandfire:silver_ore", "iceandfire:raw_silver", 1,
                     OW_DIM, OW_HOSTS, 1, 1, 0.02, -16, 112, -1, FortuneType.ORE),
             new OreSpec("simpleores:adamantium_ore", "simpleores:raw_adamantium", 2,
@@ -210,30 +225,47 @@ public final class ModCompat2Manager {
                 return;
             }
 
-            String entryMaterial = id.getPath().endsWith("_ore")
-                    ? id.getPath().substring(0, id.getPath().length() - "_ore".length())
-                    : id.getPath();
-            String entryId = id.getNamespace() + ":" + entryMaterial;
-
-            List<String> hosts = Arrays.stream(spec.hostTag.split(","))
-                    .map(String::trim).filter(s -> !s.isEmpty()).toList();
-
-            OreEntry entry = new OreEntry(
-                    entryId,
-                    true,
-                    hosts,
-                    spec.dropItem,
-                    spec.minCount, spec.maxCount,
-                    spec.chance,
-                    spec.minY, spec.maxY,
-                    spec.peakY,
-                    spec.fortuneType,
-                    spec.xpMin, spec.xpMax,
-                    spec.dimension,
-                    spec.minPickaxeLevel
-            );
-            autoDetectedOres.add(entry);
+            autoDetectedOres.add(toEntry(spec));
         });
+    }
+
+    /** Default entry for a curated id, including entries whose optional mod is not installed. */
+    public static OreEntry defaultEntry(String entryId) {
+        return ORE_SPECS.stream()
+                .filter(spec -> entryIdFor(spec).equals(entryId))
+                .findFirst()
+                .map(ModCompat2Manager::toEntry)
+                .orElse(null);
+    }
+
+    /** The six Phase 2 compatibility entries written to the user-editable config. */
+    public static List<OreEntry> phaseTwoDefaults() {
+        return ORE_SPECS.stream()
+                .filter(spec -> "create".equals(namespace(spec)) || "mekanism".equals(namespace(spec)))
+                .map(ModCompat2Manager::toEntry)
+                .toList();
+    }
+
+    private static OreEntry toEntry(OreSpec spec) {
+        List<String> hosts = Arrays.stream(spec.hostTag.split(","))
+                .map(String::trim).filter(s -> !s.isEmpty()).toList();
+        return new OreEntry(entryIdFor(spec), true, hosts, spec.dropItem,
+                spec.minCount, spec.maxCount, spec.chance, spec.minY, spec.maxY, spec.peakY,
+                spec.fortuneType, spec.xpMin, spec.xpMax, spec.dimension, spec.minPickaxeLevel);
+    }
+
+    private static String entryIdFor(OreSpec spec) {
+        ResourceLocation id = ResourceLocation.tryParse(spec.oreBlockId);
+        if (id == null) return spec.oreBlockId;
+        String material = id.getPath().endsWith("_ore")
+                ? id.getPath().substring(0, id.getPath().length() - "_ore".length())
+                : id.getPath();
+        return id.getNamespace() + ":" + material;
+    }
+
+    private static String namespace(OreSpec spec) {
+        ResourceLocation id = ResourceLocation.tryParse(spec.oreBlockId);
+        return id == null ? "" : id.getNamespace();
     }
 
     private static void scanStones() {

@@ -1,0 +1,5 @@
+//? if !item_model_definition {
+{
+  "parent": "ore_yield:block/stone_generator"
+}
+//?}

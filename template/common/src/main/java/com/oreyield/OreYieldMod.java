@@ -15,12 +15,8 @@ public final class OreYieldMod {
 
     public static void init() {
         OreConfigIO.load(Services.PLATFORM.getConfigDirectory().resolve("ore_yield.toml"));
-        if (OreConfig.isModCompatEnabled()) {
-            ModCompatManager.scan();
-        }
-        if (OreConfig.isModCompat2Enabled()) {
-            ModCompat2Manager.scan();
-        }
+        // Compatibility scans inspect block tags. Tags are not bound during the
+        // client/common entrypoint, so they are refreshed after the server starts.
         OreConfig.rebuild();
     }
 

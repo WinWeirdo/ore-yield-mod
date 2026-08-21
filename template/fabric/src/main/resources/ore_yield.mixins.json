@@ -3,7 +3,8 @@
   "package": "com.oreyield.fabric.mixin",
   "compatibilityLevel": "JAVA_{{java}}",
   "mixins": [
-    "BlockDropMixin"
+    "BlockDropMixin",
+    "BlockItemPlaceMixin"
   ],
   "injectors": {
     "defaultRequire": 1

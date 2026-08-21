@@ -4,6 +4,9 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.oreyield.config.OreEntry;
 import com.oreyield.loot.BreakRollStore;
+import com.oreyield.loot.BreakContext;
+import com.oreyield.loot.MineralPocketResult;
+import com.oreyield.platform.Services;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -82,7 +85,14 @@ public final class OreYieldLootModifier extends LootModifier {
         Player player = context.getParamOrNull(LootContextParams.THIS_ENTITY) instanceof Player p ? p : null;
         //?}
         if (player != null && player.isCreative()) return generatedLoot;
-        List<OreEntry> hits = BreakRollStore.takeOrRoll(context.getLevel(), pos, state, tool, context.getRandom(), player);
+        //? if loot_context_parameter_api {
+        boolean explosion = context.hasParameter(LootContextParams.EXPLOSION_RADIUS);
+        //?} else {
+        boolean explosion = context.hasParam(LootContextParams.EXPLOSION_RADIUS);
+        //?}
+        BreakContext breakContext = explosion ? BreakContext.EXPLOSION
+                : BreakContext.fromPlayer(player != null, player != null && Services.PLATFORM.isFakePlayer(player));
+        List<OreEntry> hits = BreakRollStore.takeOrRoll(context.getLevel(), pos, state, tool, context.getRandom(), player, breakContext);
         LOGGER.debug("[Ore Yield] Applying ore rolls: state={} pos={} tool={} fortune={} hits={}",
                 net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock()), pos, tool, fortune,
                 hits.size());
@@ -93,6 +103,10 @@ public final class OreYieldLootModifier extends LootModifier {
             if (!extra.isEmpty()) generatedLoot.add(extra);
             totalXp += hit.rollXp(context.getRandom());
         }
+        MineralPocketResult pocket = BreakRollStore.takeOrRollMineralPocket(context.getLevel(), pos, state, tool,
+                context.getRandom(), player, breakContext);
+        generatedLoot.addAll(pocket.drops());
+        pocket.announce(player);
         // A global loot modifier runs only while successful block loot is being generated.
         // Keeping XP here prevents canceled break attempts from advancing pity or awarding XP.
         if (totalXp > 0 && (player == null || !player.isCreative())) {

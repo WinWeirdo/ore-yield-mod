@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "ore_yield:block/stone_generator" }
+  }
+}
