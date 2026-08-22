@@ -1,0 +1,8 @@
+//? if singular_data_directories {
+{
+  "fabric:load_conditions": [
+    { "condition": "fabric:registry_contains", "values": ["ore_yield:stone_generator"] }
+  ],
+  "type": "ore_yield:stone_generator"
+}
+//?}

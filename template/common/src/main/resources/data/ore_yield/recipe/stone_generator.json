@@ -1,5 +1,0 @@
-//? if singular_data_directories {
-{
-  "type": "ore_yield:stone_generator"
-}
-//?}

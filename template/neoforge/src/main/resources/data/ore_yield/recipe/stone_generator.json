@@ -1,0 +1,6 @@
+{
+  "neoforge:conditions": [
+    { "type": "neoforge:registered", "value": "ore_yield:stone_generator" }
+  ],
+  "type": "ore_yield:stone_generator"
+}

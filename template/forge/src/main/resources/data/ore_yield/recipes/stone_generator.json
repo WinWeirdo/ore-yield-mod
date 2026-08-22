@@ -1,0 +1,13 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        { "type": "forge:item_exists", "item": "ore_yield:stone_generator" }
+      ],
+      "recipe": {
+        "type": "ore_yield:stone_generator"
+      }
+    }
+  ]
+}
