@@ -29,7 +29,7 @@ public final class OreConfig {
     private static volatile boolean badLuckEliminator = true;
     private static volatile double badLuckMultiplier = 2.0D;
     private static volatile int stoneGeneratorCooldownTicks = 1;
-    private static volatile boolean stoneGeneratorEnabled = false;
+    private static volatile boolean stoneGeneratorEnabled = true;
     private static volatile boolean generatorTrackingBlocksEnabled = false;
     private static volatile boolean generatorOreYieldEnabled = true;
     private static volatile double generatorOreYieldChanceMultiplier = 0.25D;
@@ -194,7 +194,7 @@ public final class OreConfig {
         return stoneGeneratorCooldownTicks;
     }
 
-    /** Startup setting: enables Stone Generator content and requires Ore Yield on clients. */
+    /** Startup setting: enables Stone Generator content with normal vanilla output by default. */
     public static boolean isStoneGeneratorEnabled() {
         return stoneGeneratorEnabled;
     }
