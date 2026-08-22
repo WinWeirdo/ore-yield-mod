@@ -121,6 +121,7 @@ public final class DebugReport {
             String fortune = switch (entry.fortuneType()) {
                 case ORE -> "ORE (multiplicative)";
                 case REDSTONE -> "REDSTONE (additive)";
+                case AMETHYST -> "AMETHYST (cluster Fortune)";
                 case NONE -> "NONE";
             };
             sb.append(entry.id())

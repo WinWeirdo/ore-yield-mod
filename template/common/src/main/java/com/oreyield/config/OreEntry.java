@@ -135,6 +135,12 @@ public record OreEntry(String id, boolean enabled, List<String> hosts, String re
                 if (random.nextDouble() >= 2.0 / (fortuneLevel + 2)) {
                     count *= 2 + random.nextInt(fortuneLevel);
                 }
+            } else if (fortuneType == FortuneType.AMETHYST && fortuneLevel > 0) {
+                // Matches a vanilla amethyst cluster: Fortune I has a 1/3 chance
+                // of 8 shards; II has 4/8/12 at 50%/25%/25%; III has
+                // 4/8/12/16 at 40%/20%/20%/20%.
+                int multiplier = 1 + Math.max(0, random.nextInt(fortuneLevel + 2) - 1);
+                count *= multiplier;
             }
         }
         count = Math.max(1, count);

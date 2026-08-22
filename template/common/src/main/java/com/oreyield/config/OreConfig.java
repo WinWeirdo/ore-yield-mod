@@ -74,6 +74,9 @@ public final class OreConfig {
         add("lapis", new OreEntry("lapis", true, List.of(ow), "minecraft:lapis_lazuli", 4, 9, 0.011, -64, 64, -2, FortuneType.ORE, 2, 5, owDim, 1));
         add("diamond", new OreEntry("diamond", true, List.of(ow), "minecraft:diamond", 1, 1, 0.006, -64, 16, -59, FortuneType.ORE, 3, 7, owDim, 2));
         add("emerald", new OreEntry("emerald", true, List.of(ow), "minecraft:emerald", 1, 1, 0.003, -16, 320, 85, FortuneType.ORE, 3, 7, owDim, 2));
+        // Optional amethyst cluster-style shards. Geodes generate at Y -58..30;
+        // 0.1% keeps this supplemental source rarer than the regular ore entries.
+        add("amethyst", new OreEntry("amethyst", false, List.of(ow), "minecraft:amethyst_shard", 4, 4, 0.001, -58, 30, -1, FortuneType.AMETHYST, 0, 0, owDim, 0));
         // Nether ores
         add("nether_quartz", new OreEntry("nether_quartz", true, List.of(ne), "minecraft:quartz", 1, 1, 0.024, 10, 117, 114, FortuneType.ORE, 2, 5, neDim, 0));
         add("nether_gold", new OreEntry("nether_gold", true, List.of(ne), "minecraft:gold_nugget", 2, 6, 0.011, 10, 117, 16, FortuneType.ORE, 0, 0, neDim, 0));

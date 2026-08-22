@@ -3,7 +3,9 @@ package com.oreyield.config;
 public enum FortuneType {
     NONE,
     ORE,
-    REDSTONE;
+    REDSTONE,
+    /** Vanilla amethyst-cluster Fortune distribution: 4/8/12/16 shards. */
+    AMETHYST;
 
     public static FortuneType parse(String value) {
         try {

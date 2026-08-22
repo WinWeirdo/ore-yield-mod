@@ -3,7 +3,6 @@ package com.oreyield.advancement;
 import com.oreyield.OreYieldMod;
 import com.oreyield.config.MineralPocketType;
 import com.oreyield.loot.MineralPocketResult;
-import com.oreyield.util.ResourceLocations;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -13,7 +12,6 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /** Server-side awards for Ore Yield's data-driven advancements. */
 public final class OreYieldAdvancements {
-    private static final String CRITERION = "earned";
     private static final String DROP_COUNTER = "ore_yield_drops";
     private static boolean dropCounterRegistered;
 
@@ -64,12 +62,10 @@ public final class OreYieldAdvancements {
 
     private static void grant(ServerPlayer player, String id) {
         MinecraftServer server = serverFor(player);
-        //? if resourcelocation_factory_required {
-        var advancement = server.getAdvancements().get(ResourceLocations.of(OreYieldMod.MOD_ID, id));
-        //?} else {
-        var advancement = server.getAdvancements().getAdvancement(ResourceLocations.of(OreYieldMod.MOD_ID, id));
-        //?}
-        if (advancement != null) player.getAdvancements().award(advancement, CRITERION);
+        // Use Minecraft's own advancement command instead of loader-specific
+        // PlayerAdvancements internals. This also sends the normal vanilla
+        // advancement update packet to clients that do not have Ore Yield.
+        run(server, "advancement grant " + player.getScoreboardName() + " only " + OreYieldMod.MOD_ID + ":" + id);
     }
 
     private static MinecraftServer serverFor(ServerPlayer player) {
