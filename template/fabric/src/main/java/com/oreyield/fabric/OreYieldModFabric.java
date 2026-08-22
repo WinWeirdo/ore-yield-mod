@@ -39,6 +39,17 @@ public final class OreYieldModFabric implements ModInitializer {
                 new StoneGeneratorBlock()
                 //?}
                 );
+        Registry.register(BuiltInRegistries.ITEM, id, new StoneGeneratorItem(stoneGenerator,
+                //? if block_properties_require_id {
+                new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id))
+                //?} else {
+                new Item.Properties()
+                //?}
+                ));
+        Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, id, StoneGeneratorRecipe.SERIALIZER);
+    }
+
+    private static void registerGeneratedTrackingContent() {
         for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.generatedDefinitions()) {
             var markerId = ResourceLocations.of(OreYieldMod.MOD_ID, definition.id());
             Registry.register(BuiltInRegistries.BLOCK, markerId,
@@ -49,14 +60,6 @@ public final class OreYieldModFabric implements ModInitializer {
                     //?}
                     );
         }
-        Registry.register(BuiltInRegistries.ITEM, id, new StoneGeneratorItem(stoneGenerator,
-                //? if block_properties_require_id {
-                new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id))
-                //?} else {
-                new Item.Properties()
-                //?}
-                ));
-        Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, id, StoneGeneratorRecipe.SERIALIZER);
     }
 
     private static void registerPlayerPlacedContent() {
@@ -76,6 +79,7 @@ public final class OreYieldModFabric implements ModInitializer {
     public void onInitialize() {
         OreYieldMod.init();
         if (OreConfig.isStoneGeneratorEnabled()) registerStoneGeneratorContent();
+        if (OreConfig.isStoneGeneratorEnabled() && OreConfig.areGeneratorTrackingBlocksEnabled()) registerGeneratedTrackingContent();
         if (OreConfig.isAntiCheeseMechanicsEnabled()) registerPlayerPlacedContent();
         // AFTER is only fired for a completed break; rewards must never be paid for a
         // break that another mod or a protection plugin cancels in BEFORE.

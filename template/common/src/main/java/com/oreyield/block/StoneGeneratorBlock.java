@@ -50,9 +50,7 @@ public final class StoneGeneratorBlock extends Block {
         BlockPos targetPos = pos.above();
         if (targetBlock != null && level.isEmptyBlock(targetPos)) {
             Block generatedHost = ProvenanceHostBlocks.generatedFor(targetBlock);
-            if (generatedHost != null) {
-                level.setBlock(targetPos, generatedHost.defaultBlockState(), 3);
-            }
+            level.setBlock(targetPos, (generatedHost != null ? generatedHost : targetBlock).defaultBlockState(), 3);
         }
         level.scheduleTick(pos, this, OreConfig.stoneGeneratorCooldownTicks());
     }

@@ -48,6 +48,7 @@ public final class OreYieldModNeoForge {
     public OreYieldModNeoForge(IEventBus modBus) {
         OreYieldMod.init();
         if (OreConfig.isStoneGeneratorEnabled()) registerStoneGeneratorContent();
+        if (OreConfig.isStoneGeneratorEnabled() && OreConfig.areGeneratorTrackingBlocksEnabled()) registerGeneratedTrackingContent();
         if (OreConfig.isAntiCheeseMechanicsEnabled()) registerPlayerPlacedContent();
         LOOT_MODIFIERS.register(modBus);
         BIOME_MODIFIERS.register(modBus);
@@ -71,15 +72,6 @@ public final class OreYieldModNeoForge {
                 StoneGeneratorBlock::new
                 //?}
                 );
-        for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.generatedDefinitions()) {
-            BLOCKS.register(definition.id(),
-                    //? if block_properties_require_id {
-                    id -> new ProvenanceHostBlock(definition.source(), definition.origin(), id)
-                    //?} else {
-                    () -> new ProvenanceHostBlock(definition.source(), definition.origin())
-                    //?}
-                    );
-        }
         ITEMS.register("stone_generator",
                 //? if block_properties_require_id {
                 id -> new StoneGeneratorItem(stoneGenerator.get(), new Item.Properties()
@@ -89,6 +81,18 @@ public final class OreYieldModNeoForge {
                 //?}
                 );
         RECIPE_SERIALIZERS.register("stone_generator", () -> StoneGeneratorRecipe.SERIALIZER);
+    }
+
+    private static void registerGeneratedTrackingContent() {
+        for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.generatedDefinitions()) {
+            BLOCKS.register(definition.id(),
+                    //? if block_properties_require_id {
+                    id -> new ProvenanceHostBlock(definition.source(), definition.origin(), id)
+                    //?} else {
+                    () -> new ProvenanceHostBlock(definition.source(), definition.origin())
+                    //?}
+                    );
+        }
     }
 
     private static void registerPlayerPlacedContent() {

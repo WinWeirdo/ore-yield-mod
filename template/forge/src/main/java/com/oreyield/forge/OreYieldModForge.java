@@ -45,6 +45,7 @@ public final class OreYieldModForge {
         OreYieldMod.init();
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         if (OreConfig.isStoneGeneratorEnabled()) registerStoneGeneratorContent();
+        if (OreConfig.isStoneGeneratorEnabled() && OreConfig.areGeneratorTrackingBlocksEnabled()) registerGeneratedTrackingContent();
         if (OreConfig.isAntiCheeseMechanicsEnabled()) registerPlayerPlacedContent();
         LOOT_MODIFIERS.register(modBus);
         BIOME_MODIFIERS.register(modBus);
@@ -62,11 +63,14 @@ public final class OreYieldModForge {
 
     private static void registerStoneGeneratorContent() {
         RegistryObject<Block> stoneGenerator = BLOCKS.register("stone_generator", StoneGeneratorBlock::new);
+        ITEMS.register("stone_generator", () -> new StoneGeneratorItem(stoneGenerator.get(), new Item.Properties()));
+        RECIPE_SERIALIZERS.register("stone_generator", () -> StoneGeneratorRecipe.SERIALIZER);
+    }
+
+    private static void registerGeneratedTrackingContent() {
         for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.generatedDefinitions()) {
             BLOCKS.register(definition.id(), () -> new ProvenanceHostBlock(definition.source(), definition.origin()));
         }
-        ITEMS.register("stone_generator", () -> new StoneGeneratorItem(stoneGenerator.get(), new Item.Properties()));
-        RECIPE_SERIALIZERS.register("stone_generator", () -> StoneGeneratorRecipe.SERIALIZER);
     }
 
     private static void registerPlayerPlacedContent() {

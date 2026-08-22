@@ -103,6 +103,7 @@ public final class OreConfigIO {
             }
             boolean antiCheeseEnabled = bool(top, "enable_anti_cheese_mechanics", false);
             OreConfig.setValue("stone_generator_enabled", bool(top, "stone_generator_enabled", antiCheeseEnabled));
+            OreConfig.setValue("generator_tracking_blocks_enabled", bool(top, "generator_tracking_blocks_enabled", false));
             OreConfig.setValue("generator_ore_yield_enabled", bool(top, "generator_ore_yield_enabled", true));
             OreConfig.setValue("generator_ore_yield_chance_multiplier", decimal(top, "generator_ore_yield_chance_multiplier", 0.25D));
             OreConfig.setValue("enable_anti_cheese_mechanics", antiCheeseEnabled);
@@ -169,6 +170,9 @@ public final class OreConfigIO {
         sb.append("# Disabled by default so Ore Yield remains server-side: clients do not need this mod.\n");
         sb.append("# Enables Stone Generator content; every client must install Ore Yield and restart.\n");
         line(sb, "stone_generator_enabled", OreConfig.isStoneGeneratorEnabled());
+        sb.append("# Disabled by default. When off, the Generator creates normal vanilla host blocks.\n");
+        sb.append("# Enable only for Generator-specific yield, automation, explosion, and pocket controls.\n");
+        line(sb, "generator_tracking_blocks_enabled", OreConfig.areGeneratorTrackingBlocksEnabled());
         sb.append("# Tracks player-placed eligible blocks separately; every client must install Ore Yield and restart.\n");
         line(sb, "enable_anti_cheese_mechanics", OreConfig.isAntiCheeseMechanicsEnabled());
         sb.append("# Generator output is tracked separately from world blocks and rolls Ore Yield rewards by default.\n");
@@ -287,7 +291,7 @@ public final class OreConfigIO {
                 "mineral_pockets_allow_generator", "mineral_pockets_allow_automated_harvesting",
                 "mineral_pocket_chance", "mineral_pocket_min_resource_types",
                 "mineral_pocket_max_resource_types", "stone_generator_cooldown_ticks",
-                "stone_generator_enabled", "enable_anti_cheese_mechanics", "generator_ore_yield_enabled",
+                "stone_generator_enabled", "generator_tracking_blocks_enabled", "enable_anti_cheese_mechanics", "generator_ore_yield_enabled",
                 "generator_ore_yield_chance_multiplier", "allow_player_placed_eligible_blocks",
                 "allow_generator_automated_harvesting", "allow_generator_explosion_harvesting",
                 "stone_generator_surrounding_item", "stone_generator_center_item",

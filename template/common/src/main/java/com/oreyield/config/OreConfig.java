@@ -30,6 +30,7 @@ public final class OreConfig {
     private static volatile double badLuckMultiplier = 2.0D;
     private static volatile int stoneGeneratorCooldownTicks = 1;
     private static volatile boolean stoneGeneratorEnabled = false;
+    private static volatile boolean generatorTrackingBlocksEnabled = false;
     private static volatile boolean generatorOreYieldEnabled = true;
     private static volatile double generatorOreYieldChanceMultiplier = 0.25D;
     private static volatile boolean antiCheeseMechanicsEnabled = false;
@@ -193,6 +194,11 @@ public final class OreConfig {
     /** Startup setting: enables Stone Generator content and requires Ore Yield on clients. */
     public static boolean isStoneGeneratorEnabled() {
         return stoneGeneratorEnabled;
+    }
+
+    /** Startup setting: enables generated-host marker blocks for Generator-specific behavior. */
+    public static boolean areGeneratorTrackingBlocksEnabled() {
+        return generatorTrackingBlocksEnabled;
     }
 
     public static boolean isGeneratorOreYieldEnabled() {
@@ -388,6 +394,7 @@ public final class OreConfig {
             case "auto_detect_dimensions" -> autoDetectDimensions = value;
             case "bad_luck_eliminator" -> badLuckEliminator = value;
             case "stone_generator_enabled" -> stoneGeneratorEnabled = value;
+            case "generator_tracking_blocks_enabled" -> generatorTrackingBlocksEnabled = value;
             case "generator_ore_yield_enabled" -> generatorOreYieldEnabled = value;
             case "enable_anti_cheese_mechanics" -> antiCheeseMechanicsEnabled = value;
             case "allow_player_placed_eligible_blocks" -> allowPlayerPlacedEligibleBlocks = value;

@@ -53,7 +53,7 @@ Either setting registers custom blocks that Minecraft must synchronize to client
 
 ### Stone Generator
 
-The Stone Generator is available when `stone_generator_enabled = true`, independently of `enable_anti_cheese_mechanics`; it requires Ore Yield on every client. It is crafted with eight diamonds around one end stone. After each cooldown, it attempts to create a host block immediately above itself: stone in the Overworld, netherrack in the Nether, and end stone in the End. It never replaces an occupied block. Its output is persistently marked, so it can be balanced independently from naturally generated or player-placed host blocks.
+The Stone Generator is available when `stone_generator_enabled = true`, independently of `enable_anti_cheese_mechanics`. It is crafted with eight diamonds around one end stone. After each cooldown, it attempts to create a host block immediately above itself: normal stone in the Overworld, netherrack in the Nether, and end stone in the End. It never replaces an occupied block. Enable Generator Tracking Blocks only when its output needs to be persistently marked and balanced independently.
 
 It explicitly drops itself only when mined with a **diamond or netherite pickaxe**. Other tools do not drop the block.
 
@@ -64,6 +64,8 @@ The cooldown is editable in the config GUI and in the config file. Recipe ingred
 stone_generator_cooldown_ticks = 1
 # Default: false. Enables the Stone Generator block and recipe; requires Ore Yield on all clients.
 stone_generator_enabled = false
+# Default: false. Enables custom generated-block tracking. Disabled means normal vanilla Generator output.
+generator_tracking_blocks_enabled = false
 # Default: false. Enables player-placed anti-cheese markers; requires Ore Yield on all clients.
 enable_anti_cheese_mechanics = false
 # Default: true. Allows Ore Yield drops from marked generator output.
