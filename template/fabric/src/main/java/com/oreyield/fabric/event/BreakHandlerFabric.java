@@ -1,6 +1,7 @@
 package com.oreyield.fabric.event;
 
 import com.oreyield.config.OreEntry;
+import com.oreyield.advancement.OreYieldAdvancements;
 import com.oreyield.loot.BreakRollStore;
 import com.oreyield.loot.BreakContext;
 import com.oreyield.loot.MineralPocketResult;
@@ -60,6 +61,7 @@ public final class BreakHandlerFabric {
             ItemStack extra = hit.createDrop(level.getRandom(), fortune);
             if (!extra.isEmpty()) {
                 Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, extra);
+                OreYieldAdvancements.onOreDrop(player, state, extra);
                 LOGGER.debug("[Ore Yield] dropped {} x{}", extra.getItem(), extra.getCount());
             }
             totalXp += hit.rollXp(level.getRandom());
@@ -70,6 +72,7 @@ public final class BreakHandlerFabric {
             Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, extra);
         }
         pocket.announce(player);
+        OreYieldAdvancements.onMineralPocket(player, pocket);
         if (totalXp > 0) {
             ExperienceOrb.award(level, Vec3.atCenterOf(pos), totalXp);
         }

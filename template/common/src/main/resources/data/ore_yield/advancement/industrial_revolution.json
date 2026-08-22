@@ -1,0 +1,18 @@
+//? if singular_data_directories {
+{
+  "parent": "ore_yield:from_stone",
+  "display": {
+    "icon": {
+      //? if item_model_definition {
+      "id": "minecraft:raw_iron"
+      //?} else {
+      "item": "minecraft:raw_iron"
+      //?}
+    },
+    "title": { "translate": "advancement.ore_yield.industrial_revolution.title" },
+    "description": { "translate": "advancement.ore_yield.industrial_revolution.description" },
+    "frame": "goal", "show_toast": true, "announce_to_chat": true, "hidden": false
+  },
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } }
+}
+//?}

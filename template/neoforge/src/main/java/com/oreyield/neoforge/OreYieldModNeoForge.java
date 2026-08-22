@@ -2,6 +2,7 @@ package com.oreyield.neoforge;
 
 import com.mojang.serialization.MapCodec;
 import com.oreyield.OreYieldMod;
+import com.oreyield.config.OreConfig;
 import com.oreyield.block.StoneGeneratorBlock;
 import com.oreyield.block.ProvenanceHostBlock;
 import com.oreyield.block.ProvenanceHostBlocks;
@@ -26,33 +27,13 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Mod(OreYieldMod.MOD_ID)
 public final class OreYieldModNeoForge {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(Registries.BLOCK, OreYieldMod.MOD_ID);
-    public static final DeferredHolder<Block, StoneGeneratorBlock> STONE_GENERATOR = BLOCKS.register("stone_generator",
-            //? if block_properties_require_id {
-            id -> new StoneGeneratorBlock(id)
-            //?} else {
-            StoneGeneratorBlock::new
-            //?}
-            );
-    public static final Map<String, DeferredHolder<Block, ? extends Block>> PROVENANCE_HOSTS = registerProvenanceHosts();
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(Registries.ITEM, OreYieldMod.MOD_ID);
-    public static final DeferredHolder<Item, BlockItem> STONE_GENERATOR_ITEM = ITEMS.register("stone_generator",
-            //? if block_properties_require_id {
-            id -> new BlockItem(STONE_GENERATOR.get(), new Item.Properties()
-                    .setId(ResourceKey.create(Registries.ITEM, id)))
-            //?} else {
-            () -> new BlockItem(STONE_GENERATOR.get(), new Item.Properties())
-            //?}
-            );
     public static final DeferredRegister<net.minecraft.world.item.crafting.RecipeSerializer<?>> RECIPE_SERIALIZERS =
             DeferredRegister.create(Registries.RECIPE_SERIALIZER, OreYieldMod.MOD_ID);
-    public static final DeferredHolder<net.minecraft.world.item.crafting.RecipeSerializer<?>, net.minecraft.world.item.crafting.RecipeSerializer<StoneGeneratorRecipe>> STONE_GENERATOR_RECIPE =
-            RECIPE_SERIALIZERS.register("stone_generator", () -> StoneGeneratorRecipe.SERIALIZER);
     public static final DeferredRegister<MapCodec<? extends IGlobalLootModifier>> LOOT_MODIFIERS =
             DeferredRegister.create(NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, OreYieldMod.MOD_ID);
     public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<OreYieldLootModifier>> ORE_YIELD =
@@ -65,6 +46,9 @@ public final class OreYieldModNeoForge {
 
     public OreYieldModNeoForge(IEventBus modBus) {
         OreYieldMod.init();
+        if (OreConfig.isAntiCheeseMechanicsEnabled()) {
+            registerAntiCheeseContent();
+        }
         LOOT_MODIFIERS.register(modBus);
         BIOME_MODIFIERS.register(modBus);
         BLOCKS.register(modBus);
@@ -79,18 +63,32 @@ public final class OreYieldModNeoForge {
         OreYieldMod.discoverModdedDimensions(event.getServer());
     }
 
-    private static Map<String, DeferredHolder<Block, ? extends Block>> registerProvenanceHosts() {
-        Map<String, DeferredHolder<Block, ? extends Block>> blocks = new LinkedHashMap<>();
+    private static void registerAntiCheeseContent() {
+        DeferredHolder<Block, StoneGeneratorBlock> stoneGenerator = BLOCKS.register("stone_generator",
+                //? if block_properties_require_id {
+                id -> new StoneGeneratorBlock(id)
+                //?} else {
+                StoneGeneratorBlock::new
+                //?}
+                );
         for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.definitions()) {
-            blocks.put(definition.id(), BLOCKS.register(definition.id(),
+            BLOCKS.register(definition.id(),
                     //? if block_properties_require_id {
                     id -> new ProvenanceHostBlock(definition.source(), definition.origin(), id)
                     //?} else {
                     () -> new ProvenanceHostBlock(definition.source(), definition.origin())
                     //?}
-                    ));
+                    );
         }
-        return Map.copyOf(blocks);
+        ITEMS.register("stone_generator",
+                //? if block_properties_require_id {
+                id -> new BlockItem(stoneGenerator.get(), new Item.Properties()
+                        .setId(ResourceKey.create(Registries.ITEM, id)))
+                //?} else {
+                () -> new BlockItem(stoneGenerator.get(), new Item.Properties())
+                //?}
+                );
+        RECIPE_SERIALIZERS.register("stone_generator", () -> StoneGeneratorRecipe.SERIALIZER);
     }
 
     //? if neoforge_server_data {

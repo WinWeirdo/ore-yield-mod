@@ -1,0 +1,18 @@
+//? if singular_data_directories {
+{
+  "parent": "ore_yield:from_stone",
+  "display": {
+    "icon": {
+      //? if item_model_definition {
+      "id": "minecraft:diamond"
+      //?} else {
+      "item": "minecraft:diamond"
+      //?}
+    },
+    "title": { "translate": "advancement.ore_yield.against_all_odds.title" },
+    "description": { "translate": "advancement.ore_yield.against_all_odds.description" },
+    "frame": "goal", "show_toast": true, "announce_to_chat": true, "hidden": false
+  },
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } }
+}
+//?}

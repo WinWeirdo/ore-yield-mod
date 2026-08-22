@@ -1,0 +1,18 @@
+//? if singular_data_directories {
+{
+  "parent": "ore_yield:jackpot",
+  "display": {
+    "icon": {
+      //? if item_model_definition {
+      "id": "minecraft:ancient_debris"
+      //?} else {
+      "item": "minecraft:ancient_debris"
+      //?}
+    },
+    "title": { "translate": "advancement.ore_yield.ancient_discovery.title" },
+    "description": { "translate": "advancement.ore_yield.ancient_discovery.description" },
+    "frame": "challenge", "show_toast": true, "announce_to_chat": true, "hidden": false
+  },
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } }
+}
+//?}

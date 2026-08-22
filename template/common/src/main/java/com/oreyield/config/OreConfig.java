@@ -31,6 +31,7 @@ public final class OreConfig {
     private static volatile int stoneGeneratorCooldownTicks = 1;
     private static volatile boolean generatorOreYieldEnabled = true;
     private static volatile double generatorOreYieldChanceMultiplier = 0.25D;
+    private static volatile boolean antiCheeseMechanicsEnabled = false;
     private static volatile boolean allowPlayerPlacedEligibleBlocks = true;
     private static volatile boolean allowGeneratorAutomatedHarvesting = false;
     private static volatile boolean allowGeneratorExplosionHarvesting = false;
@@ -194,6 +195,14 @@ public final class OreConfig {
 
     public static double generatorOreYieldChanceMultiplier() {
         return generatorOreYieldChanceMultiplier;
+    }
+
+    /**
+     * Enables provenance-marker blocks and the Stone Generator content. This is a
+     * startup setting: registering custom content makes Ore Yield client-required.
+     */
+    public static boolean isAntiCheeseMechanicsEnabled() {
+        return antiCheeseMechanicsEnabled;
     }
 
     public static boolean allowsPlayerPlacedEligibleBlocks() {
@@ -376,6 +385,7 @@ public final class OreConfig {
             case "auto_detect_dimensions" -> autoDetectDimensions = value;
             case "bad_luck_eliminator" -> badLuckEliminator = value;
             case "generator_ore_yield_enabled" -> generatorOreYieldEnabled = value;
+            case "enable_anti_cheese_mechanics" -> antiCheeseMechanicsEnabled = value;
             case "allow_player_placed_eligible_blocks" -> allowPlayerPlacedEligibleBlocks = value;
             case "allow_generator_automated_harvesting" -> allowGeneratorAutomatedHarvesting = value;
             case "allow_generator_explosion_harvesting" -> allowGeneratorExplosionHarvesting = value;

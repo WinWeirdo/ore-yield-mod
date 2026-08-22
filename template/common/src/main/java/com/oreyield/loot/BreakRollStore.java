@@ -2,6 +2,7 @@ package com.oreyield.loot;
 
 import com.oreyield.config.OreConfig;
 import com.oreyield.config.OreEntry;
+import com.oreyield.advancement.OreYieldAdvancements;
 import com.oreyield.block.HostOrigin;
 import com.oreyield.block.ProvenanceHostBlocks;
 import net.minecraft.core.BlockPos;
@@ -87,6 +88,7 @@ public final class BreakRollStore {
             String counterId = generatorOutput ? entry.id() + "|generator" : entry.id();
             if (!hit && eligible && BadLuckEliminator.shouldForceDrop(player, counterId, entry, chanceMultiplier)) {
                 hit = true;
+                OreYieldAdvancements.onBadLuckEliminatorActivated(player);
             }
             if (hit) hits.add(entry);
             if (eligible) {

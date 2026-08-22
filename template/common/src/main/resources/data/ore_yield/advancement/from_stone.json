@@ -1,0 +1,18 @@
+//? if singular_data_directories {
+{
+  "display": {
+    "icon": {
+      //? if item_model_definition {
+      "id": "minecraft:stone"
+      //?} else {
+      "item": "minecraft:stone"
+      //?}
+    },
+    "title": { "translate": "advancement.ore_yield.from_stone.title" },
+    "description": { "translate": "advancement.ore_yield.from_stone.description" },
+    "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
+    "frame": "task", "show_toast": true, "announce_to_chat": true, "hidden": false
+  },
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } }
+}
+//?}

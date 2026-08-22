@@ -84,6 +84,7 @@ public final class OreConfigIO {
             }
             OreConfig.setValue("generator_ore_yield_enabled", bool(top, "generator_ore_yield_enabled", true));
             OreConfig.setValue("generator_ore_yield_chance_multiplier", decimal(top, "generator_ore_yield_chance_multiplier", 0.25D));
+            OreConfig.setValue("enable_anti_cheese_mechanics", bool(top, "enable_anti_cheese_mechanics", false));
             OreConfig.setValue("allow_player_placed_eligible_blocks", bool(top, "allow_player_placed_eligible_blocks", true));
             OreConfig.setValue("allow_generator_automated_harvesting", bool(top, "allow_generator_automated_harvesting", false));
             OreConfig.setValue("allow_generator_explosion_harvesting", bool(top, "allow_generator_explosion_harvesting", false));
@@ -132,6 +133,9 @@ public final class OreConfigIO {
         sb.append("\n");
         sb.append("# Stone Generator: cooldown in server ticks (20 ticks = one second).\n");
         line(sb, "stone_generator_cooldown_ticks", OreConfig.stoneGeneratorCooldownTicks());
+        sb.append("# Disabled by default so Ore Yield remains server-side: clients do not need this mod.\n");
+        sb.append("# Enabling this adds provenance-marker blocks and the Stone Generator, so every client must install Ore Yield and restart.\n");
+        line(sb, "enable_anti_cheese_mechanics", OreConfig.isAntiCheeseMechanicsEnabled());
         sb.append("# Generator output is tracked separately from world blocks and rolls Ore Yield rewards by default.\n");
         line(sb, "generator_ore_yield_enabled", OreConfig.isGeneratorOreYieldEnabled());
         sb.append("# Applied only to marked generator output when generator ore yield is enabled.\n");

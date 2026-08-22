@@ -2,6 +2,7 @@ package com.oreyield.forge;
 
 import com.mojang.serialization.Codec;
 import com.oreyield.OreYieldMod;
+import com.oreyield.config.OreConfig;
 import com.oreyield.block.StoneGeneratorBlock;
 import com.oreyield.block.ProvenanceHostBlock;
 import com.oreyield.block.ProvenanceHostBlocks;
@@ -22,21 +23,13 @@ import net.minecraftforge.registries.RegistryObject;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Mod(OreYieldMod.MOD_ID)
 public final class OreYieldModForge {
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, OreYieldMod.MOD_ID);
-    public static final RegistryObject<Block> STONE_GENERATOR = BLOCKS.register("stone_generator", StoneGeneratorBlock::new);
-    public static final Map<String, RegistryObject<Block>> PROVENANCE_HOSTS = registerProvenanceHosts();
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, OreYieldMod.MOD_ID);
-    public static final RegistryObject<Item> STONE_GENERATOR_ITEM = ITEMS.register("stone_generator",
-            () -> new BlockItem(STONE_GENERATOR.get(), new Item.Properties()));
     public static final DeferredRegister<net.minecraft.world.item.crafting.RecipeSerializer<?>> RECIPE_SERIALIZERS =
             DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, OreYieldMod.MOD_ID);
-    public static final RegistryObject<net.minecraft.world.item.crafting.RecipeSerializer<StoneGeneratorRecipe>> STONE_GENERATOR_RECIPE =
-            RECIPE_SERIALIZERS.register("stone_generator", () -> StoneGeneratorRecipe.SERIALIZER);
     public static final DeferredRegister<Codec<? extends IGlobalLootModifier>> LOOT_MODIFIERS =
             DeferredRegister.create(ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, OreYieldMod.MOD_ID);
     public static final RegistryObject<Codec<OreYieldLootModifier>> ORE_YIELD =
@@ -50,6 +43,9 @@ public final class OreYieldModForge {
     public OreYieldModForge() {
         OreYieldMod.init();
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+        if (OreConfig.isAntiCheeseMechanicsEnabled()) {
+            registerAntiCheeseContent();
+        }
         LOOT_MODIFIERS.register(modBus);
         BIOME_MODIFIERS.register(modBus);
         BLOCKS.register(modBus);
@@ -64,13 +60,13 @@ public final class OreYieldModForge {
         OreYieldMod.discoverModdedDimensions(event.getServer());
     }
 
-    private static Map<String, RegistryObject<Block>> registerProvenanceHosts() {
-        Map<String, RegistryObject<Block>> blocks = new LinkedHashMap<>();
+    private static void registerAntiCheeseContent() {
+        RegistryObject<Block> stoneGenerator = BLOCKS.register("stone_generator", StoneGeneratorBlock::new);
         for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.definitions()) {
-            blocks.put(definition.id(), BLOCKS.register(definition.id(),
-                    () -> new ProvenanceHostBlock(definition.source(), definition.origin())));
+            BLOCKS.register(definition.id(), () -> new ProvenanceHostBlock(definition.source(), definition.origin()));
         }
-        return Map.copyOf(blocks);
+        ITEMS.register("stone_generator", () -> new BlockItem(stoneGenerator.get(), new Item.Properties()));
+        RECIPE_SERIALIZERS.register("stone_generator", () -> StoneGeneratorRecipe.SERIALIZER);
     }
 
     private static void gatherData(net.minecraftforge.data.event.GatherDataEvent event) {

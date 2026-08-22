@@ -1,0 +1,18 @@
+//? if !singular_data_directories {
+{
+  "parent": "ore_yield:from_stone",
+  "display": {
+    "icon": {
+      //? if item_model_definition {
+      "id": "minecraft:clock"
+      //?} else {
+      "item": "minecraft:clock"
+      //?}
+    },
+    "title": { "translate": "advancement.ore_yield.very_unlucky_until_now.title" },
+    "description": { "translate": "advancement.ore_yield.very_unlucky_until_now.description" },
+    "frame": "goal", "show_toast": true, "announce_to_chat": true, "hidden": false
+  },
+  "criteria": { "earned": { "trigger": "minecraft:impossible" } }
+}
+//?}

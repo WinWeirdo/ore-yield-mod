@@ -3,6 +3,7 @@ package com.oreyield.neoforge.loot;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.oreyield.config.OreEntry;
+import com.oreyield.advancement.OreYieldAdvancements;
 import com.oreyield.loot.BreakRollStore;
 import com.oreyield.loot.BreakContext;
 import com.oreyield.loot.MineralPocketResult;
@@ -100,13 +101,17 @@ public final class OreYieldLootModifier extends LootModifier {
         for (OreEntry hit : hits) {
             if (!hit.meetsPickaxeRequirement(tool, player)) continue;
             ItemStack extra = hit.createDrop(context.getRandom(), fortune);
-            if (!extra.isEmpty()) generatedLoot.add(extra);
+            if (!extra.isEmpty()) {
+                generatedLoot.add(extra);
+                OreYieldAdvancements.onOreDrop(player, state, extra);
+            }
             totalXp += hit.rollXp(context.getRandom());
         }
         MineralPocketResult pocket = BreakRollStore.takeOrRollMineralPocket(context.getLevel(), pos, state, tool,
                 context.getRandom(), player, breakContext);
         generatedLoot.addAll(pocket.drops());
         pocket.announce(player);
+        OreYieldAdvancements.onMineralPocket(player, pocket);
         // A global loot modifier runs only while successful block loot is being generated.
         // Keeping XP here prevents canceled break attempts from advancing pity or awarding XP.
         if (totalXp > 0 && (player == null || !player.isCreative())) {
