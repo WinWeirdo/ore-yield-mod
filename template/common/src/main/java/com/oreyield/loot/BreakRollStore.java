@@ -82,6 +82,8 @@ public final class BreakRollStore {
                 entries.size(), tool);
         List<OreEntry> hits = new ArrayList<>();
         for (OreEntry entry : entries) {
+            // A malformed or unavailable result item must not consume chance or reset pity.
+            if (!entry.hasAvailableResultItem()) continue;
             boolean hit = entry.rollsAt(pos, random, dimension, chanceMultiplier);
             boolean eligible = player != null && !context.automated()
                     && BadLuckEliminator.isEligible(entry, state, dimension, pos, tool, player, chanceMultiplier);

@@ -688,7 +688,7 @@ public final class OreYieldConfigScreen extends Screen {
             rows = switch (category) {
                 case GENERAL -> 4;
                 case ORES -> Math.max(1, filteredOres().size() + 1);
-                case GENERATORS -> 6;
+                case GENERATORS -> 10;
                 case COMPATIBILITY -> 5;
                 case MINERAL_POCKETS -> 12;
                 case WORLD_GENERATION -> 3;

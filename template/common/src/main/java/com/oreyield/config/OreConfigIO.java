@@ -51,7 +51,7 @@ public final class OreConfigIO {
             Map<String, String> sectionValues = null;
             Map<String, String> top = new LinkedHashMap<>();
             for (String raw : Files.readAllLines(configFile)) {
-                String line = raw.strip();
+                String line = stripInlineComment(raw).strip();
                 if (line.isEmpty() || line.startsWith("#")) continue;
                 if (line.startsWith("[") && line.endsWith("]")) {
                     if (sectionValues != null && !section.isEmpty()) {
@@ -485,6 +485,23 @@ public final class OreConfigIO {
     private static String unquote(String value) {
         if (value.startsWith("\"") && value.endsWith("\"") && value.length() >= 2) {
             return value.substring(1, value.length() - 1);
+        }
+        return value;
+    }
+
+    /** Removes a TOML comment while preserving hash characters inside quoted values. */
+    private static String stripInlineComment(String value) {
+        boolean inQuotes = false;
+        boolean escaped = false;
+        for (int index = 0; index < value.length(); index++) {
+            char character = value.charAt(index);
+            if (character == '"' && !escaped) {
+                inQuotes = !inQuotes;
+            } else if (character == '#' && !inQuotes) {
+                return value.substring(0, index).stripTrailing();
+            }
+            escaped = character == '\\' && !escaped;
+            if (character != '\\') escaped = false;
         }
         return value;
     }

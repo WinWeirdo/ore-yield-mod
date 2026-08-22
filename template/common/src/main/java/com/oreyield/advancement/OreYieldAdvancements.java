@@ -10,10 +10,16 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 /** Server-side awards for Ore Yield's data-driven advancements. */
 public final class OreYieldAdvancements {
     private static final String DROP_COUNTER = "ore_yield_drops";
     private static boolean dropCounterRegistered;
+    private static final Set<UUID> STONE_GENERATOR_RECIPIENTS = ConcurrentHashMap.newKeySet();
+    private static MinecraftServer recipientServer;
 
     private OreYieldAdvancements() {
     }
@@ -30,8 +36,20 @@ public final class OreYieldAdvancements {
     /** Called when a player crafts or receives a Stone Generator. */
     public static void onStoneGeneratorObtained(Player player) {
         if (player instanceof ServerPlayer serverPlayer) {
-            grant(serverPlayer, "the_stone_must_flow");
+            MinecraftServer server = serverFor(serverPlayer);
+            if (markStoneGeneratorRecipient(server, serverPlayer.getUUID())) {
+                grant(serverPlayer, "the_stone_must_flow");
+            }
         }
+    }
+
+    /** Avoids running an advancement command every inventory tick for every held generator. */
+    private static synchronized boolean markStoneGeneratorRecipient(MinecraftServer server, UUID playerId) {
+        if (recipientServer != server) {
+            STONE_GENERATOR_RECIPIENTS.clear();
+            recipientServer = server;
+        }
+        return STONE_GENERATOR_RECIPIENTS.add(playerId);
     }
 
     public static void onMineralPocket(Player player, MineralPocketResult pocket) {

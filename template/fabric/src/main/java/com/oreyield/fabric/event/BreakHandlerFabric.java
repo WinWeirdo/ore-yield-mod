@@ -63,8 +63,8 @@ public final class BreakHandlerFabric {
                 Containers.dropItemStack(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, extra);
                 OreYieldAdvancements.onOreDrop(player, state, extra);
                 LOGGER.debug("[Ore Yield] dropped {} x{}", extra.getItem(), extra.getCount());
+                totalXp += hit.rollXp(level.getRandom());
             }
-            totalXp += hit.rollXp(level.getRandom());
         }
         MineralPocketResult pocket = BreakRollStore.takeOrRollMineralPocket(level, pos, state, tool, level.getRandom(), player,
                 BreakContext.player(Services.PLATFORM.isFakePlayer(player)));

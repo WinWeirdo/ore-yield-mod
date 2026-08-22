@@ -147,6 +147,18 @@ public record OreEntry(String id, boolean enabled, List<String> hosts, String re
         return new ItemStack(item, count);
     }
 
+    /** Whether this entry can currently create an item drop. */
+    public boolean hasAvailableResultItem() {
+        ResourceLocation itemId = ResourceLocation.tryParse(resultItem);
+        if (itemId == null) return false;
+        //? if registry_get_optional {
+        Item item = BuiltInRegistries.ITEM.getOptional(itemId).orElse(net.minecraft.world.item.Items.AIR);
+        //?} else {
+        Item item = BuiltInRegistries.ITEM.get(itemId);
+        //?}
+        return item != null && item != net.minecraft.world.item.Items.AIR;
+    }
+
     public int rollXp(RandomSource random) {
         return xpMax <= xpMin ? xpMin : xpMin + random.nextInt(xpMax - xpMin + 1);
     }

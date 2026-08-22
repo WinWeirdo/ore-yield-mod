@@ -104,8 +104,8 @@ public final class OreYieldLootModifier extends LootModifier {
             if (!extra.isEmpty()) {
                 generatedLoot.add(extra);
                 OreYieldAdvancements.onOreDrop(player, state, extra);
+                totalXp += hit.rollXp(context.getRandom());
             }
-            totalXp += hit.rollXp(context.getRandom());
         }
         MineralPocketResult pocket = BreakRollStore.takeOrRollMineralPocket(context.getLevel(), pos, state, tool,
                 context.getRandom(), player, breakContext);
