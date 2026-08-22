@@ -33,6 +33,8 @@ Ore Yield replaces vanilla ore worldgen. Instead of finding ore blocks in walls,
 
 The config screen is available from the Forge and NeoForge title screens ("Ore Yield Config" button). On Fabric, install [Mod Menu](https://modrinth.com/mod/modmenu) to open the config screen from the mod list.
 
+Existing `ore_yield.toml` files are migrated automatically: your configured values stay intact, while newly added settings and built-in ore sections are written into the file for server-side editing. Unrecognized legacy fields and custom ore sections are retained.
+
 ### Server-side compatibility
 
 Ore Yield is server-side by default: players can join without installing the mod.

@@ -15,17 +15,36 @@ import java.util.Map;
 /** Hand-rolled TOML reader/writer for the ore_yield.toml config file. No platform config API involved. */
 public final class OreConfigIO {
     private static final Logger LOGGER = LoggerFactory.getLogger("ore_yield/Config");
+    private static final List<String> ORE_SECTION_KEYS = List.of(
+            "enabled", "host_blocks", "result_item", "min_count", "max_count", "chance",
+            "min_y", "max_y", "peak_y", "fortune_type", "xp_min", "xp_max", "dimension",
+            "min_pickaxe_level");
+    private static final List<String> LEGACY_TOP_LEVEL_KEYS = List.of(
+            "stone_generator_cooldown", "stone_generator_interval_ms");
+
+    // Retained when an old config is migrated or later saved from the in-game screen.
+    // This prevents a new Ore Yield version from deleting server-owner extensions.
+    private static Map<String, String> preservedTopLevel = Map.of();
+    private static Map<String, Map<String, String>> preservedOreFields = Map.of();
+    private static Map<String, Map<String, String>> preservedSections = Map.of();
 
     private OreConfigIO() {}
 
     public static void load(Path configFile) {
         OreConfig.setConfigPath(configFile);
         OreConfig.clearOverrides();
+        preservedTopLevel = Map.of();
+        preservedOreFields = Map.of();
+        preservedSections = Map.of();
         if (!Files.exists(configFile)) {
             save(configFile);
             OreConfig.rebuild();
             return;
         }
+        List<String> missingSettings = List.of();
+        List<String> missingOreSections = List.of();
+        List<String> missingOreFields = List.of();
+        boolean loaded = false;
         try {
             String section = "";
             Map<String, Map<String, String>> sections = new LinkedHashMap<>();
@@ -35,8 +54,8 @@ public final class OreConfigIO {
                 String line = raw.strip();
                 if (line.isEmpty() || line.startsWith("#")) continue;
                 if (line.startsWith("[") && line.endsWith("]")) {
-                    if (sectionValues != null && section.startsWith("ore.")) {
-                        sections.put(section.substring(4), sectionValues);
+                    if (sectionValues != null && !section.isEmpty()) {
+                        sections.put(section, sectionValues);
                     }
                     section = line.substring(1, line.length() - 1).strip();
                     sectionValues = new LinkedHashMap<>();
@@ -52,8 +71,8 @@ public final class OreConfigIO {
                     sectionValues.put(key, value);
                 }
             }
-            if (sectionValues != null && section.startsWith("ore.")) {
-                sections.put(section.substring(4), sectionValues);
+            if (sectionValues != null && !section.isEmpty()) {
+                sections.put(section, sectionValues);
             }
 
             OreConfig.setValue("remove_vanilla_ore_generation", bool(top, "remove_vanilla_ore_generation", false));
@@ -95,12 +114,24 @@ public final class OreConfigIO {
             OreConfig.setAutoDetectedDimensions(strList(top, "auto_detected_dimensions", List.of()));
             OreConfig.setAdditionalOres(strList(top, "additional_ores", List.of()));
             for (Map.Entry<String, Map<String, String>> entry : sections.entrySet()) {
-                OreConfig.applyOverrides(entry.getKey(), entry.getValue());
+                if (entry.getKey().startsWith("ore.")) {
+                    OreConfig.applyOverrides(entry.getKey().substring(4), entry.getValue());
+                }
             }
+            capturePreservedValues(top, sections);
+            missingSettings = missingTopLevelSettings(top);
+            missingOreSections = missingOreSections(sections);
+            missingOreFields = missingOreFields(sections);
+            loaded = true;
         } catch (IOException e) {
             LOGGER.warn("[Ore Yield] Failed to read config file {}: {}", configFile, e.getMessage());
         }
         OreConfig.rebuild();
+        if (loaded && (!missingSettings.isEmpty() || !missingOreSections.isEmpty() || !missingOreFields.isEmpty())) {
+            LOGGER.info("[Ore Yield] Updating {} with {} missing setting(s), {} missing ore section(s), and {} missing ore field(s); existing values are preserved.",
+                    configFile, missingSettings.size(), missingOreSections.size(), missingOreFields.size());
+            save(configFile);
+        }
     }
 
     public static void save(Path configFile) {
@@ -156,11 +187,13 @@ public final class OreConfigIO {
         sb.append("auto_detected_dimensions = ").append(toTomlList(OreConfig.getAutoDetectedDimensions())).append("\n");
         sb.append("\n");
         sb.append("additional_ores = ").append(toTomlList(OreConfig.getAdditionalOres())).append("\n");
+        appendPreservedTopLevel(sb);
         sb.append("# One entry per modded ore: id|enabled|result_item|min_count|max_count|chance|min_y|max_y|peak_y|fortune_type|xp_min|xp_max|dimension|host1,host2|min_pickaxe_level\n\n");
 
         for (OreEntry entry : OreConfig.defaultEntries().values()) appendOre(sb, OreConfig.effectiveEntry(entry.id()));
         sb.append("# Optional Create/Mekanism 1.20.1 entries. They activate only when the relevant mod is installed.\n\n");
         for (OreEntry entry : ModCompat2Manager.phaseTwoDefaults()) appendOre(sb, OreConfig.effectiveEntry(entry.id()));
+        appendPreservedSections(sb);
 
         try {
             Path parent = configFile.getParent();
@@ -170,6 +203,128 @@ public final class OreConfigIO {
             Files.writeString(configFile, sb.toString());
         } catch (IOException e) {
             LOGGER.warn("[Ore Yield] Failed to write config file {}: {}", configFile, e.getMessage());
+        }
+    }
+
+    private static void capturePreservedValues(Map<String, String> top, Map<String, Map<String, String>> sections) {
+        List<String> currentTopLevelKeys = currentTopLevelKeys();
+        List<String> currentOreSectionIds = currentOreSectionIds();
+        Map<String, String> extraTopLevel = new LinkedHashMap<>();
+        Map<String, Map<String, String>> extraOreFields = new LinkedHashMap<>();
+        Map<String, Map<String, String>> extraSections = new LinkedHashMap<>();
+
+        for (Map.Entry<String, String> entry : top.entrySet()) {
+            if (!currentTopLevelKeys.contains(entry.getKey()) && !LEGACY_TOP_LEVEL_KEYS.contains(entry.getKey())) {
+                extraTopLevel.put(entry.getKey(), entry.getValue());
+            }
+        }
+        for (Map.Entry<String, Map<String, String>> entry : sections.entrySet()) {
+            String section = entry.getKey();
+            Map<String, String> values = entry.getValue();
+            if (section.startsWith("ore.") && currentOreSectionIds.contains(section.substring(4))) {
+                Map<String, String> extraFields = new LinkedHashMap<>();
+                for (Map.Entry<String, String> field : values.entrySet()) {
+                    if (!ORE_SECTION_KEYS.contains(field.getKey())) {
+                        extraFields.put(field.getKey(), field.getValue());
+                    }
+                }
+                if (!extraFields.isEmpty()) {
+                    extraOreFields.put(section, extraFields);
+                }
+            } else {
+                extraSections.put(section, new LinkedHashMap<>(values));
+            }
+        }
+        preservedTopLevel = extraTopLevel;
+        preservedOreFields = extraOreFields;
+        preservedSections = extraSections;
+    }
+
+    private static List<String> missingTopLevelSettings(Map<String, String> top) {
+        List<String> missing = new ArrayList<>();
+        for (String key : currentTopLevelKeys()) {
+            if (!top.containsKey(key)) {
+                missing.add(key);
+            }
+        }
+        return missing;
+    }
+
+    private static List<String> missingOreSections(Map<String, Map<String, String>> sections) {
+        List<String> missing = new ArrayList<>();
+        for (String id : currentOreSectionIds()) {
+            if (!sections.containsKey("ore." + id)) {
+                missing.add(id);
+            }
+        }
+        return missing;
+    }
+
+    private static List<String> missingOreFields(Map<String, Map<String, String>> sections) {
+        List<String> missing = new ArrayList<>();
+        for (String id : currentOreSectionIds()) {
+            Map<String, String> values = sections.get("ore." + id);
+            if (values == null) continue;
+            for (String key : ORE_SECTION_KEYS) {
+                if (!values.containsKey(key)) {
+                    missing.add(id + "." + key);
+                }
+            }
+        }
+        return missing;
+    }
+
+    private static List<String> currentTopLevelKeys() {
+        List<String> keys = new ArrayList<>(List.of(
+                "remove_vanilla_ore_generation", "remove_compatible_ore_generation",
+                "enable_mod_compat", "enable_mod_compat_2", "mod_compat_2_ores_in_end",
+                "enable_vanilla_end_ores", "auto_detect_dimensions", "bad_luck_eliminator",
+                "bad_luck_multiplier", "enable_mineral_pockets", "mineral_pockets_end_enabled",
+                "mineral_pockets_allow_generator", "mineral_pockets_allow_automated_harvesting",
+                "mineral_pocket_chance", "mineral_pocket_min_resource_types",
+                "mineral_pocket_max_resource_types", "stone_generator_cooldown_ticks",
+                "enable_anti_cheese_mechanics", "generator_ore_yield_enabled",
+                "generator_ore_yield_chance_multiplier", "allow_player_placed_eligible_blocks",
+                "allow_generator_automated_harvesting", "allow_generator_explosion_harvesting",
+                "stone_generator_surrounding_item", "stone_generator_center_item",
+                "enabled_dimensions", "auto_detected_dimensions", "additional_ores"));
+        for (MineralPocketType type : MineralPocketType.values()) {
+            String prefix = "mineral_pocket_" + type.configKey() + "_";
+            keys.add(prefix + "enabled");
+            keys.add(prefix + "weight");
+            keys.add(prefix + "min_count");
+            keys.add(prefix + "max_count");
+        }
+        return keys;
+    }
+
+    private static List<String> currentOreSectionIds() {
+        List<String> ids = new ArrayList<>(OreConfig.defaultEntries().keySet());
+        for (OreEntry entry : ModCompat2Manager.phaseTwoDefaults()) {
+            if (!ids.contains(entry.id())) {
+                ids.add(entry.id());
+            }
+        }
+        return ids;
+    }
+
+    private static void appendPreservedTopLevel(StringBuilder sb) {
+        if (preservedTopLevel.isEmpty()) return;
+        sb.append("# Preserved unrecognized settings from an older config.\n");
+        for (Map.Entry<String, String> entry : preservedTopLevel.entrySet()) {
+            sb.append(entry.getKey()).append(" = ").append(entry.getValue()).append("\n");
+        }
+    }
+
+    private static void appendPreservedSections(StringBuilder sb) {
+        if (preservedSections.isEmpty()) return;
+        sb.append("# Preserved unrecognized config sections from an older config.\n\n");
+        for (Map.Entry<String, Map<String, String>> entry : preservedSections.entrySet()) {
+            sb.append("[").append(entry.getKey()).append("]\n");
+            for (Map.Entry<String, String> value : entry.getValue().entrySet()) {
+                sb.append(value.getKey()).append(" = ").append(value.getValue()).append("\n");
+            }
+            sb.append("\n");
         }
     }
 
@@ -210,7 +365,14 @@ public final class OreConfigIO {
         sb.append("xp_min = ").append(entry.xpMin()).append("\n");
         sb.append("xp_max = ").append(entry.xpMax()).append("\n");
         sb.append("dimension = \"").append(entry.dimension()).append("\"\n");
-        sb.append("min_pickaxe_level = ").append(entry.minPickaxeLevel()).append("\n\n");
+        sb.append("min_pickaxe_level = ").append(entry.minPickaxeLevel()).append("\n");
+        Map<String, String> extraFields = preservedOreFields.get("ore." + entry.id());
+        if (extraFields != null) {
+            for (Map.Entry<String, String> field : extraFields.entrySet()) {
+                sb.append(field.getKey()).append(" = ").append(field.getValue()).append("\n");
+            }
+        }
+        sb.append("\n");
     }
 
     private static String toTomlList(List<String> values) {
