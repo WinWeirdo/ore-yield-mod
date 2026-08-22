@@ -58,7 +58,7 @@
       "eventbus_bus_attribute": true,
       "gather_data_include_server": true,
       "pack_supported_formats": true
-      ,"item_model_definition": false
+      ,"item_model_definition": true
       ,"crafting_input_api": true
       ,"recipe_codec_api": false
       ,"legacy_crafting_dimensions": true
