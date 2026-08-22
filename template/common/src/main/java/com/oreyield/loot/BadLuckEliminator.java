@@ -72,7 +72,8 @@ public final class BadLuckEliminator {
             }
             return;
         }
-        FAILURES.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>()).merge(oreId, 1, Integer::sum);
+        FAILURES.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>())
+                .merge(oreId, 1, (failures, increment) -> failures == Integer.MAX_VALUE ? failures : failures + increment);
     }
 
     public static void clearCounters() {

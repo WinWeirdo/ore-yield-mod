@@ -392,7 +392,10 @@ public final class OreConfigIO {
     private static boolean bool(Map<String, String> map, String key, boolean def) {
         String v = map.get(key);
         if (v == null) return def;
-        return v.equalsIgnoreCase("true");
+        if (v.equalsIgnoreCase("true")) return true;
+        if (v.equalsIgnoreCase("false")) return false;
+        LOGGER.warn("[Ore Yield] Invalid boolean {}='{}'; using {}.", key, v, def);
+        return def;
     }
 
     private static double decimal(Map<String, String> map, String key, double def) {

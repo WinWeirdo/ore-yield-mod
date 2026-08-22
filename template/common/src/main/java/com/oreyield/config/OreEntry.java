@@ -108,8 +108,8 @@ public record OreEntry(String id, boolean enabled, List<String> hosts, String re
             boolean skipY = isCuratedEndOverride(dimension);
             if (!skipY) {
                 adjustedChance *= pos.getY() <= peakY
-                        ? (double) (pos.getY() - minY + 1) / (peakY - minY + 1)
-                        : (double) (maxY - pos.getY() + 1) / (maxY - peakY + 1);
+                        ? (pos.getY() - (double) minY + 1.0D) / (peakY - (double) minY + 1.0D)
+                        : (maxY - (double) pos.getY() + 1.0D) / (maxY - (double) peakY + 1.0D);
             }
         }
         return random.nextDouble() < Math.min(1.0D, adjustedChance);

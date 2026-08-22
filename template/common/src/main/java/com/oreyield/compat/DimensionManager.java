@@ -38,16 +38,16 @@ public final class DimensionManager {
         }
         TreeSet<String> configured = new TreeSet<>(OreConfig.getEnabledDimensions());
         TreeSet<String> recordedDetected = new TreeSet<>(OreConfig.getAutoDetectedDimensions());
-        TreeSet<String> previouslyDetected = new TreeSet<>(recordedDetected);
+        TreeSet<String> detectionHistory = new TreeSet<>(recordedDetected);
         // Configs created before auto_detected_dimensions existed may already
         // contain manual pruning. Preserve that selection during one-time
         // migration instead of immediately restoring every detected ID.
         if (recordedDetected.isEmpty() && !configured.isEmpty()) {
-            previouslyDetected.addAll(detected);
+            detectionHistory.addAll(detected);
         }
         // A prior auto-detected ID missing from enabled_dimensions was deliberately
         // removed by the user. Do not silently add it back on the next world load.
-        TreeSet<String> pruned = new TreeSet<>(previouslyDetected);
+        TreeSet<String> pruned = new TreeSet<>(detectionHistory);
         pruned.removeAll(configured);
         TreeSet<String> additions = new TreeSet<>(detected);
         additions.removeAll(pruned);
@@ -58,8 +58,12 @@ public final class DimensionManager {
             OreConfig.setEnabledDimensions(List.copyOf(configured));
             changed = true;
         }
-        if (!detected.equals(recordedDetected)) {
-            OreConfig.setAutoDetectedDimensions(List.copyOf(detected));
+        // Keep a cumulative history. If a mod is temporarily removed, forgetting
+        // its dimensions here would cause deliberately pruned IDs to be restored
+        // when the mod is installed again.
+        detectionHistory.addAll(detected);
+        if (!detectionHistory.equals(recordedDetected)) {
+            OreConfig.setAutoDetectedDimensions(List.copyOf(detectionHistory));
             changed = true;
         }
         if (changed && OreConfig.configPath() != null) {

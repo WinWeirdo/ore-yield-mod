@@ -459,14 +459,14 @@ public final class OreConfig {
             List<String> hosts = list(values, "host_blocks", base.hosts());
             String item = str(values, "result_item", base.resultItem());
             int rawMinCount = integer(values, "min_count", base.minCount());
-            int minCount = Math.max(1, rawMinCount);
-            if (rawMinCount < 1) {
-                LOGGER.warn("[Ore Yield] Ore '{}' has min_count={}; min_count clamped to 1.", id, rawMinCount);
+            int minCount = Math.max(1, Math.min(64, rawMinCount));
+            if (minCount != rawMinCount) {
+                LOGGER.warn("[Ore Yield] Ore '{}' has min_count={}; min_count clamped to {}.", id, rawMinCount, minCount);
             }
             int rawMax = integer(values, "max_count", base.maxCount());
-            int maxCount = Math.max(minCount, rawMax);
-            if (rawMax < minCount) {
-                LOGGER.warn("[Ore Yield] Ore '{}' has max_count={} less than min_count={}; max_count clamped to {}.", id, rawMax, minCount, maxCount);
+            int maxCount = Math.max(minCount, Math.min(64, rawMax));
+            if (maxCount != rawMax) {
+                LOGGER.warn("[Ore Yield] Ore '{}' has max_count={}; max_count clamped to {}.", id, rawMax, maxCount);
             }
             double chance = normalizedChance(id, decimal(values, "chance", base.chance()));
             int minY = integer(values, "min_y", base.minY());
@@ -478,14 +478,14 @@ public final class OreConfig {
             int peakY = integer(values, "peak_y", base.peakY());
             FortuneType fortune = FortuneType.parse(str(values, "fortune_type", base.fortuneType().name()));
             int rawXpMin = integer(values, "xp_min", base.xpMin());
-            int xpMin = Math.max(0, rawXpMin);
-            if (rawXpMin < 0) {
-                LOGGER.warn("[Ore Yield] Ore '{}' has xp_min={}; xp_min clamped to 0.", id, rawXpMin);
+            int xpMin = Math.max(0, Math.min(128, rawXpMin));
+            if (xpMin != rawXpMin) {
+                LOGGER.warn("[Ore Yield] Ore '{}' has xp_min={}; xp_min clamped to {}.", id, rawXpMin, xpMin);
             }
             int rawXpMax = integer(values, "xp_max", base.xpMax());
-            int xpMax = Math.max(xpMin, rawXpMax);
-            if (rawXpMax < xpMin) {
-                LOGGER.warn("[Ore Yield] Ore '{}' has xp_max={} less than xp_min={}; xp_max clamped to {}.", id, rawXpMax, xpMin, xpMax);
+            int xpMax = Math.max(xpMin, Math.min(128, rawXpMax));
+            if (xpMax != rawXpMax) {
+                LOGGER.warn("[Ore Yield] Ore '{}' has xp_max={}; xp_max clamped to {}.", id, rawXpMax, xpMax);
             }
             String dimension = str(values, "dimension", base.dimension());
             int rawPickLevel = integer(values, "min_pickaxe_level", base.minPickaxeLevel());
@@ -502,7 +502,11 @@ public final class OreConfig {
 
     private static boolean bool(Map<String, String> values, String key, boolean def) {
         String v = values.get(key);
-        return v == null ? def : v.equalsIgnoreCase("true");
+        if (v == null) return def;
+        if (v.equalsIgnoreCase("true")) return true;
+        if (v.equalsIgnoreCase("false")) return false;
+        LOGGER.warn("[Ore Yield] Invalid boolean {}='{}'; using {}.", key, v, def);
+        return def;
     }
 
     private static int integer(Map<String, String> values, String key, int def) {
@@ -609,16 +613,16 @@ public final class OreConfig {
 
     private static Optional<OreEntry> parseAdditionalLegacy(String[] part, int minPickaxeLevel) {
         try {
-            int minCount = Math.max(1, Integer.parseInt(part[3]));
-            int maxCount = Math.max(minCount, Integer.parseInt(part[4]));
+            int minCount = Math.max(1, Math.min(64, Integer.parseInt(part[3])));
+            int maxCount = Math.max(minCount, Math.min(64, Integer.parseInt(part[4])));
             int minY = Integer.parseInt(part[6]);
             int maxY = Math.max(minY, Integer.parseInt(part[7]));
-            int xpMin = Math.max(0, Integer.parseInt(part[10]));
-            int xpMax = Math.max(xpMin, Math.max(0, Integer.parseInt(part[11])));
+            int xpMin = Math.max(0, Math.min(128, Integer.parseInt(part[10])));
+            int xpMax = Math.max(xpMin, Math.min(128, Integer.parseInt(part[11])));
             List<String> hosts = java.util.Arrays.stream(part[12].split(","))
                     .map(String::trim).filter(value -> !value.isEmpty()).toList();
             if (part[0].isBlank() || part[2].isBlank() || hosts.isEmpty()) return Optional.empty();
-            return Optional.of(new OreEntry(part[0], Boolean.parseBoolean(part[1]), hosts, part[2], minCount, maxCount,
+            return Optional.of(new OreEntry(part[0], strictBoolean(part[1]), hosts, part[2], minCount, maxCount,
                     normalizedChance(part[0], Double.parseDouble(part[5])), minY, maxY, Integer.parseInt(part[8]), FortuneType.parse(part[9]),
                     xpMin, xpMax, "",
                     minPickaxeLevel));
@@ -630,17 +634,17 @@ public final class OreConfig {
 
     private static Optional<OreEntry> parseAdditionalWithDimension(String[] part, int minPickaxeLevel) {
         try {
-            int minCount = Math.max(1, Integer.parseInt(part[3]));
-            int maxCount = Math.max(minCount, Integer.parseInt(part[4]));
+            int minCount = Math.max(1, Math.min(64, Integer.parseInt(part[3])));
+            int maxCount = Math.max(minCount, Math.min(64, Integer.parseInt(part[4])));
             int minY = Integer.parseInt(part[6]);
             int maxY = Math.max(minY, Integer.parseInt(part[7]));
-            int xpMin = Math.max(0, Integer.parseInt(part[10]));
-            int xpMax = Math.max(xpMin, Math.max(0, Integer.parseInt(part[11])));
+            int xpMin = Math.max(0, Math.min(128, Integer.parseInt(part[10])));
+            int xpMax = Math.max(xpMin, Math.min(128, Integer.parseInt(part[11])));
             String dimension = part[12].trim();
             List<String> hosts = java.util.Arrays.stream(part[13].split(","))
                     .map(String::trim).filter(value -> !value.isEmpty()).toList();
             if (part[0].isBlank() || part[2].isBlank() || hosts.isEmpty()) return Optional.empty();
-            return Optional.of(new OreEntry(part[0], Boolean.parseBoolean(part[1]), hosts, part[2], minCount, maxCount,
+            return Optional.of(new OreEntry(part[0], strictBoolean(part[1]), hosts, part[2], minCount, maxCount,
                     normalizedChance(part[0], Double.parseDouble(part[5])), minY, maxY, Integer.parseInt(part[8]), FortuneType.parse(part[9]),
                     xpMin, xpMax, dimension,
                     minPickaxeLevel));
@@ -648,5 +652,11 @@ public final class OreConfig {
             LOGGER.warn("[Ore Yield] Skipping malformed additional_ore entry: {}", String.join("|", part), e);
             return Optional.empty();
         }
+    }
+
+    private static boolean strictBoolean(String value) {
+        if ("true".equalsIgnoreCase(value)) return true;
+        if ("false".equalsIgnoreCase(value)) return false;
+        throw new IllegalArgumentException("invalid boolean '" + value + "'");
     }
 }

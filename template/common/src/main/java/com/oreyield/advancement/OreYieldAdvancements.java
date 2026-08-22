@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /** Server-side awards for Ore Yield's data-driven advancements. */
 public final class OreYieldAdvancements {
     private static final String DROP_COUNTER = "ore_yield_drops";
-    private static boolean dropCounterRegistered;
+    private static MinecraftServer dropCounterServer;
     private static final Set<UUID> STONE_GENERATOR_RECIPIENTS = ConcurrentHashMap.newKeySet();
     private static MinecraftServer recipientServer;
 
@@ -75,12 +75,12 @@ public final class OreYieldAdvancements {
         }
     }
 
-    private static void incrementDropCounter(ServerPlayer player) {
+    private static synchronized void incrementDropCounter(ServerPlayer player) {
         MinecraftServer server = serverFor(player);
         String playerName = player.getScoreboardName();
-        if (!dropCounterRegistered) {
+        if (dropCounterServer != server) {
             run(server, "scoreboard objectives add " + DROP_COUNTER + " dummy");
-            dropCounterRegistered = true;
+            dropCounterServer = server;
         }
         run(server, "scoreboard players add " + playerName + " " + DROP_COUNTER + " 1");
         run(server, "execute if score " + playerName + " " + DROP_COUNTER + " matches 1000.. run advancement grant "

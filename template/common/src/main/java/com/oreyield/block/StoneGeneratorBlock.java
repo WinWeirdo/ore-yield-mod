@@ -76,9 +76,9 @@ public final class StoneGeneratorBlock extends Block {
     }
 
     private static Block hostBlockFor(ServerLevel level) {
-        if (level.dimension() == Level.OVERWORLD) return Blocks.STONE;
-        if (level.dimension() == Level.NETHER) return Blocks.NETHERRACK;
-        if (level.dimension() == Level.END) return Blocks.END_STONE;
+        if (Level.OVERWORLD.equals(level.dimension())) return Blocks.STONE;
+        if (Level.NETHER.equals(level.dimension())) return Blocks.NETHERRACK;
+        if (Level.END.equals(level.dimension())) return Blocks.END_STONE;
         // DimensionManager has no host-block mapping for custom dimensions.
         return null;
     }
