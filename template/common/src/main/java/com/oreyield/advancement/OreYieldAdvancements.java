@@ -28,9 +28,19 @@ public final class OreYieldAdvancements {
     public static void onOreDrop(Player player, BlockState hostState, ItemStack drop) {
         if (!(player instanceof ServerPlayer serverPlayer) || drop.isEmpty()) return;
 
-        grant(serverPlayer, "from_stone");
         if (drop.is(Items.DIAMOND)) grant(serverPlayer, "against_all_odds");
         incrementDropCounter(serverPlayer);
+    }
+
+    /**
+     * Awards the root advancement as soon as a valid, tool-eligible Ore Yield
+     * result is selected.  This happens before loaders hand the item to their
+     * individual drop-spawning paths, so the root cannot be missed on Fabric.
+     */
+    public static void onOreYieldRolled(Player player) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            grant(serverPlayer, "from_stone");
+        }
     }
 
     /** Called when a player crafts or receives a Stone Generator. */

@@ -92,7 +92,12 @@ public final class BreakRollStore {
                 hit = true;
                 OreYieldAdvancements.onBadLuckEliminatorActivated(player);
             }
-            if (hit) hits.add(entry);
+            if (hit) {
+                hits.add(entry);
+                if (entry.meetsPickaxeRequirement(tool, player)) {
+                    OreYieldAdvancements.onOreYieldRolled(player);
+                }
+            }
             if (eligible) {
                 BadLuckEliminator.advance(player, counterId, hit);
             }
