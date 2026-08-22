@@ -1,7 +1,6 @@
 package com.oreyield.advancement;
 
 import com.oreyield.OreYieldMod;
-import com.oreyield.block.ProvenanceHostBlocks;
 import com.oreyield.config.MineralPocketType;
 import com.oreyield.loot.MineralPocketResult;
 import com.oreyield.util.ResourceLocations;
@@ -10,7 +9,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 /** Server-side awards for Ore Yield's data-driven advancements. */
@@ -28,10 +26,14 @@ public final class OreYieldAdvancements {
 
         grant(serverPlayer, "from_stone");
         if (drop.is(Items.DIAMOND)) grant(serverPlayer, "against_all_odds");
-        if (ProvenanceHostBlocks.canonicalState(hostState).is(Blocks.STONE)) {
+        incrementDropCounter(serverPlayer);
+    }
+
+    /** Called when a player crafts or receives a Stone Generator. */
+    public static void onStoneGeneratorObtained(Player player) {
+        if (player instanceof ServerPlayer serverPlayer) {
             grant(serverPlayer, "the_stone_must_flow");
         }
-        incrementDropCounter(serverPlayer);
     }
 
     public static void onMineralPocket(Player player, MineralPocketResult pocket) {

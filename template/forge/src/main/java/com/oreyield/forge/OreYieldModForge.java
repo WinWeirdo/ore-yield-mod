@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.oreyield.OreYieldMod;
 import com.oreyield.config.OreConfig;
 import com.oreyield.block.StoneGeneratorBlock;
+import com.oreyield.item.StoneGeneratorItem;
 import com.oreyield.block.ProvenanceHostBlock;
 import com.oreyield.block.ProvenanceHostBlocks;
 import com.oreyield.recipe.StoneGeneratorRecipe;
@@ -43,9 +44,8 @@ public final class OreYieldModForge {
     public OreYieldModForge() {
         OreYieldMod.init();
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-        if (OreConfig.isAntiCheeseMechanicsEnabled()) {
-            registerAntiCheeseContent();
-        }
+        if (OreConfig.isStoneGeneratorEnabled()) registerStoneGeneratorContent();
+        if (OreConfig.isAntiCheeseMechanicsEnabled()) registerPlayerPlacedContent();
         LOOT_MODIFIERS.register(modBus);
         BIOME_MODIFIERS.register(modBus);
         BLOCKS.register(modBus);
@@ -60,13 +60,19 @@ public final class OreYieldModForge {
         OreYieldMod.discoverModdedDimensions(event.getServer());
     }
 
-    private static void registerAntiCheeseContent() {
+    private static void registerStoneGeneratorContent() {
         RegistryObject<Block> stoneGenerator = BLOCKS.register("stone_generator", StoneGeneratorBlock::new);
-        for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.definitions()) {
+        for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.generatedDefinitions()) {
             BLOCKS.register(definition.id(), () -> new ProvenanceHostBlock(definition.source(), definition.origin()));
         }
-        ITEMS.register("stone_generator", () -> new BlockItem(stoneGenerator.get(), new Item.Properties()));
+        ITEMS.register("stone_generator", () -> new StoneGeneratorItem(stoneGenerator.get(), new Item.Properties()));
         RECIPE_SERIALIZERS.register("stone_generator", () -> StoneGeneratorRecipe.SERIALIZER);
+    }
+
+    private static void registerPlayerPlacedContent() {
+        for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.playerPlacedDefinitions()) {
+            BLOCKS.register(definition.id(), () -> new ProvenanceHostBlock(definition.source(), definition.origin()));
+        }
     }
 
     private static void gatherData(net.minecraftforge.data.event.GatherDataEvent event) {

@@ -3,6 +3,7 @@ package com.oreyield.fabric;
 import com.oreyield.OreYieldMod;
 import com.oreyield.config.OreConfig;
 import com.oreyield.block.StoneGeneratorBlock;
+import com.oreyield.item.StoneGeneratorItem;
 import com.oreyield.block.ProvenanceHostBlock;
 import com.oreyield.block.ProvenanceHostBlocks;
 import com.oreyield.recipe.StoneGeneratorRecipe;
@@ -29,7 +30,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 
 public final class OreYieldModFabric implements ModInitializer {
-    private static void registerAntiCheeseContent() {
+    private static void registerStoneGeneratorContent() {
         var id = ResourceLocations.of(OreYieldMod.MOD_ID, "stone_generator");
         Block stoneGenerator = Registry.register(BuiltInRegistries.BLOCK, id,
                 //? if block_properties_require_id {
@@ -38,7 +39,7 @@ public final class OreYieldModFabric implements ModInitializer {
                 new StoneGeneratorBlock()
                 //?}
                 );
-        for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.definitions()) {
+        for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.generatedDefinitions()) {
             var markerId = ResourceLocations.of(OreYieldMod.MOD_ID, definition.id());
             Registry.register(BuiltInRegistries.BLOCK, markerId,
                     //? if block_properties_require_id {
@@ -48,7 +49,7 @@ public final class OreYieldModFabric implements ModInitializer {
                     //?}
                     );
         }
-        Registry.register(BuiltInRegistries.ITEM, id, new BlockItem(stoneGenerator,
+        Registry.register(BuiltInRegistries.ITEM, id, new StoneGeneratorItem(stoneGenerator,
                 //? if block_properties_require_id {
                 new Item.Properties().setId(ResourceKey.create(Registries.ITEM, id))
                 //?} else {
@@ -58,12 +59,24 @@ public final class OreYieldModFabric implements ModInitializer {
         Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, id, StoneGeneratorRecipe.SERIALIZER);
     }
 
+    private static void registerPlayerPlacedContent() {
+        for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.playerPlacedDefinitions()) {
+            var markerId = ResourceLocations.of(OreYieldMod.MOD_ID, definition.id());
+            Registry.register(BuiltInRegistries.BLOCK, markerId,
+                    //? if block_properties_require_id {
+                    new ProvenanceHostBlock(definition.source(), definition.origin(), markerId)
+                    //?} else {
+                    new ProvenanceHostBlock(definition.source(), definition.origin())
+                    //?}
+                    );
+        }
+    }
+
     @Override
     public void onInitialize() {
         OreYieldMod.init();
-        if (OreConfig.isAntiCheeseMechanicsEnabled()) {
-            registerAntiCheeseContent();
-        }
+        if (OreConfig.isStoneGeneratorEnabled()) registerStoneGeneratorContent();
+        if (OreConfig.isAntiCheeseMechanicsEnabled()) registerPlayerPlacedContent();
         // AFTER is only fired for a completed break; rewards must never be paid for a
         // break that another mod or a protection plugin cancels in BEFORE.
         PlayerBlockBreakEvents.AFTER.register(BreakHandlerFabric::onAfterBreak);

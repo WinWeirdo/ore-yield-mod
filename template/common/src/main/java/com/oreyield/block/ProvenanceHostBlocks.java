@@ -17,11 +17,15 @@ public final class ProvenanceHostBlocks {
 
     private ProvenanceHostBlocks() {}
 
-    public static List<Definition> definitions() {
+    public static List<Definition> generatedDefinitions() {
         return List.of(
                 new Definition("generated_stone", Blocks.STONE, HostOrigin.GENERATED),
                 new Definition("generated_netherrack", Blocks.NETHERRACK, HostOrigin.GENERATED),
-                new Definition("generated_end_stone", Blocks.END_STONE, HostOrigin.GENERATED),
+                new Definition("generated_end_stone", Blocks.END_STONE, HostOrigin.GENERATED));
+    }
+
+    public static List<Definition> playerPlacedDefinitions() {
+        return List.of(
                 new Definition("player_placed_stone", Blocks.STONE, HostOrigin.PLAYER_PLACED),
                 new Definition("player_placed_deepslate", Blocks.DEEPSLATE, HostOrigin.PLAYER_PLACED),
                 new Definition("player_placed_tuff", Blocks.TUFF, HostOrigin.PLAYER_PLACED),

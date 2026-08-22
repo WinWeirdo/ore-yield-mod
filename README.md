@@ -42,16 +42,18 @@ Ore Yield is server-side by default: players can join without installing the mod
 Do **not** enable the following setting unless every client also has the matching Ore Yield version installed:
 
 ```toml
+stone_generator_enabled = true
+# Optional, separate player-placed-block provenance tracking:
 enable_anti_cheese_mechanics = true
 ```
 
-It registers the anti-cheese provenance blocks and Stone Generator content, which Minecraft must synchronize to clients. Restart the server and all modded clients after changing it. Leave it `false` to keep Ore Yield client-optional.
+Either setting registers custom blocks that Minecraft must synchronize to clients. Restart the server and all modded clients after changing either setting. Leave both `false` to keep Ore Yield client-optional.
 
 ### Key Settings
 
 ### Stone Generator
 
-The Stone Generator is available only when `enable_anti_cheese_mechanics = true`; that mode requires Ore Yield on every client. It is crafted with eight diamonds around one end stone. After each cooldown, it attempts to create a host block immediately above itself: stone in the Overworld, netherrack in the Nether, and end stone in the End. It never replaces an occupied block. Its output is persistently marked, so it can be balanced independently from naturally generated or player-placed host blocks.
+The Stone Generator is available when `stone_generator_enabled = true`, independently of `enable_anti_cheese_mechanics`; it requires Ore Yield on every client. It is crafted with eight diamonds around one end stone. After each cooldown, it attempts to create a host block immediately above itself: stone in the Overworld, netherrack in the Nether, and end stone in the End. It never replaces an occupied block. Its output is persistently marked, so it can be balanced independently from naturally generated or player-placed host blocks.
 
 It explicitly drops itself only when mined with a **diamond or netherite pickaxe**. Other tools do not drop the block.
 
@@ -60,7 +62,9 @@ The cooldown is editable in the config GUI and in the config file. Recipe ingred
 ```toml
 # Default: one server tick (20 ticks = one second)
 stone_generator_cooldown_ticks = 1
-# Default: false. Enables anti-cheese markers and Stone Generator content; requires Ore Yield on all clients.
+# Default: false. Enables the Stone Generator block and recipe; requires Ore Yield on all clients.
+stone_generator_enabled = false
+# Default: false. Enables player-placed anti-cheese markers; requires Ore Yield on all clients.
 enable_anti_cheese_mechanics = false
 # Default: true. Allows Ore Yield drops from marked generator output.
 generator_ore_yield_enabled = true

@@ -126,6 +126,7 @@ public final class OreYieldConfigScreen extends Screen {
         putFlag("enable_mod_compat_2", OreConfig.isModCompat2Enabled());
         putFlag("mod_compat_2_ores_in_end", OreConfig.isModCompat2OresInEnd());
         putFlag("enable_vanilla_end_ores", OreConfig.isVanillaEndOresEnabled());
+        putFlag("stone_generator_enabled", OreConfig.isStoneGeneratorEnabled());
         putFlag("generator_ore_yield_enabled", OreConfig.isGeneratorOreYieldEnabled());
         putFlag("enable_anti_cheese_mechanics", OreConfig.isAntiCheeseMechanicsEnabled());
         putFlag("allow_player_placed_eligible_blocks", OreConfig.allowsPlayerPlacedEligibleBlocks());
@@ -240,8 +241,9 @@ public final class OreYieldConfigScreen extends Screen {
 
     private void buildGenerators() {
         beginSection(Category.GENERATORS.title(), Category.GENERATORS.help());
-        addToggle("enable_anti_cheese_mechanics", "enable_anti_cheese_mechanics");
+        addToggle("stone_generator_enabled", "stone_generator_enabled");
         addInfoRow(Component.translatable("gui.ore_yield.config.anti_cheese.restart_notice"));
+        addToggle("enable_anti_cheese_mechanics", "enable_anti_cheese_mechanics");
         addToggle("generator_ore_yield_enabled", "generator_ore_yield_enabled");
         addTextField("generator_ore_yield_chance_multiplier", "generator_ore_yield_chance_multiplier", 12);
         addTextField("stone_generator_cooldown_ticks", "stone_generator_cooldown_ticks", 12);
@@ -460,7 +462,7 @@ public final class OreYieldConfigScreen extends Screen {
         captureVisibleFields();
         switch (category) {
             case GENERAL -> resetKeys("bad_luck_eliminator", "auto_detect_dimensions", "bad_luck_multiplier");
-            case GENERATORS -> resetKeys("generator_ore_yield_enabled", "generator_ore_yield_chance_multiplier",
+            case GENERATORS -> resetKeys("stone_generator_enabled", "generator_ore_yield_enabled", "generator_ore_yield_chance_multiplier",
                     "enable_anti_cheese_mechanics", "stone_generator_cooldown_ticks", "allow_player_placed_eligible_blocks",
                     "allow_generator_automated_harvesting", "allow_generator_explosion_harvesting");
             case COMPATIBILITY -> resetKeys("enable_mod_compat", "enable_mod_compat_2", "mod_compat_2_ores_in_end", "enable_vanilla_end_ores");

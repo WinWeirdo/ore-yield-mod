@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 import com.oreyield.OreYieldMod;
 import com.oreyield.config.OreConfig;
 import com.oreyield.block.StoneGeneratorBlock;
+import com.oreyield.item.StoneGeneratorItem;
 import com.oreyield.block.ProvenanceHostBlock;
 import com.oreyield.block.ProvenanceHostBlocks;
 import com.oreyield.recipe.StoneGeneratorRecipe;
@@ -46,9 +47,8 @@ public final class OreYieldModNeoForge {
 
     public OreYieldModNeoForge(IEventBus modBus) {
         OreYieldMod.init();
-        if (OreConfig.isAntiCheeseMechanicsEnabled()) {
-            registerAntiCheeseContent();
-        }
+        if (OreConfig.isStoneGeneratorEnabled()) registerStoneGeneratorContent();
+        if (OreConfig.isAntiCheeseMechanicsEnabled()) registerPlayerPlacedContent();
         LOOT_MODIFIERS.register(modBus);
         BIOME_MODIFIERS.register(modBus);
         BLOCKS.register(modBus);
@@ -63,7 +63,7 @@ public final class OreYieldModNeoForge {
         OreYieldMod.discoverModdedDimensions(event.getServer());
     }
 
-    private static void registerAntiCheeseContent() {
+    private static void registerStoneGeneratorContent() {
         DeferredHolder<Block, StoneGeneratorBlock> stoneGenerator = BLOCKS.register("stone_generator",
                 //? if block_properties_require_id {
                 id -> new StoneGeneratorBlock(id)
@@ -71,7 +71,7 @@ public final class OreYieldModNeoForge {
                 StoneGeneratorBlock::new
                 //?}
                 );
-        for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.definitions()) {
+        for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.generatedDefinitions()) {
             BLOCKS.register(definition.id(),
                     //? if block_properties_require_id {
                     id -> new ProvenanceHostBlock(definition.source(), definition.origin(), id)
@@ -82,13 +82,25 @@ public final class OreYieldModNeoForge {
         }
         ITEMS.register("stone_generator",
                 //? if block_properties_require_id {
-                id -> new BlockItem(stoneGenerator.get(), new Item.Properties()
+                id -> new StoneGeneratorItem(stoneGenerator.get(), new Item.Properties()
                         .setId(ResourceKey.create(Registries.ITEM, id)))
                 //?} else {
-                () -> new BlockItem(stoneGenerator.get(), new Item.Properties())
+                () -> new StoneGeneratorItem(stoneGenerator.get(), new Item.Properties())
                 //?}
                 );
         RECIPE_SERIALIZERS.register("stone_generator", () -> StoneGeneratorRecipe.SERIALIZER);
+    }
+
+    private static void registerPlayerPlacedContent() {
+        for (ProvenanceHostBlocks.Definition definition : ProvenanceHostBlocks.playerPlacedDefinitions()) {
+            BLOCKS.register(definition.id(),
+                    //? if block_properties_require_id {
+                    id -> new ProvenanceHostBlock(definition.source(), definition.origin(), id)
+                    //?} else {
+                    () -> new ProvenanceHostBlock(definition.source(), definition.origin())
+                    //?}
+                    );
+        }
     }
 
     //? if neoforge_server_data {
