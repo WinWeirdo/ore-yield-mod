@@ -1,6 +1,10 @@
 {
   "neoforge:conditions": [
+    //? if neoforge_registered_condition {
     { "type": "neoforge:registered", "value": "ore_yield:stone_generator" }
+    //?} else {
+    { "type": "neoforge:item_exists", "item": "ore_yield:stone_generator" }
+    //?}
   ],
   "type": "ore_yield:stone_generator"
 }

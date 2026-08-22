@@ -3,7 +3,7 @@
   "parent": "ore_yield:jackpot",
   "display": {
     "icon": {
-      //? if item_model_definition {
+      //? if advancement_icon_id {
       "id": "minecraft:ancient_debris"
       //?} else {
       "item": "minecraft:ancient_debris"

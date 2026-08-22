@@ -21,6 +21,7 @@
       "identifier_renamed": false,
       "loot_type_unrolling": false
       ,"item_model_definition": false
+      ,"advancement_icon_id": false
       ,"crafting_input_api": false
       ,"recipe_codec_api": false
       ,"legacy_crafting_dimensions": true
@@ -58,7 +59,9 @@
       "eventbus_bus_attribute": true,
       "gather_data_include_server": true,
       "pack_supported_formats": true
-      ,"item_model_definition": true
+      ,"item_model_definition": false
+      ,"advancement_icon_id": true
+      ,"neoforge_registered_condition": false
       ,"crafting_input_api": true
       ,"recipe_codec_api": false
       ,"legacy_crafting_dimensions": true
@@ -105,7 +108,9 @@
       "registryaccess_lookup": true,
       "loot_context_parameter_api": true,
       "neoforge_server_data": true
+      ,"neoforge_registered_condition": true
       ,"item_model_definition": true
+      ,"advancement_icon_id": true
       ,"crafting_input_api": true
       ,"recipe_codec_api": false
       ,"legacy_crafting_dimensions": false
@@ -156,10 +161,12 @@
       "break_block_event": true,
       "loot_modifier_priority": true,
       "neoforge_server_data": true,
+      "neoforge_registered_condition": true,
       "fabric_keymapping_renamed": true,
       "fabric_server_level_events": true,
       "player_display_client_message": false
       ,"item_model_definition": true
+      ,"advancement_icon_id": true
       ,"crafting_input_api": true
       ,"recipe_codec_api": true
       ,"legacy_crafting_dimensions": false
@@ -210,11 +217,13 @@
       "break_block_event": true,
       "loot_modifier_priority": true,
       "neoforge_server_data": true,
+      "neoforge_registered_condition": true,
       "fabric_keymapping_renamed": true,
       "fabric_server_level_events": true,
       "player_display_client_message": false,
       "minecraft_set_screen_and_show": true
       ,"item_model_definition": true
+      ,"advancement_icon_id": true
       ,"crafting_input_api": true
       ,"recipe_codec_api": true
       ,"legacy_crafting_dimensions": false

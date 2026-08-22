@@ -3,7 +3,7 @@
   "parent": "ore_yield:from_stone",
   "display": {
     "icon": {
-      //? if item_model_definition {
+      //? if advancement_icon_id {
       "id": "minecraft:clock"
       //?} else {
       "item": "minecraft:clock"

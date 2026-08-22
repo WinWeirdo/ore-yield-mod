@@ -2,7 +2,7 @@
 {
   "display": {
     "icon": {
-      //? if item_model_definition {
+      //? if advancement_icon_id {
       "id": "minecraft:stone"
       //?} else {
       "item": "minecraft:stone"
