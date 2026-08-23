@@ -9,8 +9,8 @@
       "item": "minecraft:clock"
       //?}
     },
-    "title": { "translate": "advancement.ore_yield.very_unlucky_until_now.title" },
-    "description": { "translate": "advancement.ore_yield.very_unlucky_until_now.description" },
+    "title": { "translate": "advancement.ore_yield.very_unlucky_until_now.title", "fallback": "Very Unlucky... Until Now" },
+    "description": { "translate": "advancement.ore_yield.very_unlucky_until_now.description", "fallback": "Receive a Bad Luck Eliminator drop." },
     "frame": "goal", "show_toast": true, "announce_to_chat": true, "hidden": false
   },
   "criteria": { "earned": { "trigger": "minecraft:impossible" } }

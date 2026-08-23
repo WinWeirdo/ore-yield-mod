@@ -9,8 +9,8 @@
       "item": "minecraft:end_stone"
       //?}
     },
-    "title": { "translate": "advancement.ore_yield.the_stone_must_flow.title" },
-    "description": { "translate": "advancement.ore_yield.the_stone_must_flow.description" },
+    "title": { "translate": "advancement.ore_yield.the_stone_must_flow.title", "fallback": "The Stone Must Flow" },
+    "description": { "translate": "advancement.ore_yield.the_stone_must_flow.description", "fallback": "Craft or obtain a Stone Generator." },
     "frame": "task", "show_toast": true, "announce_to_chat": true, "hidden": false
   },
   "criteria": { "earned": { "trigger": "minecraft:impossible" } }

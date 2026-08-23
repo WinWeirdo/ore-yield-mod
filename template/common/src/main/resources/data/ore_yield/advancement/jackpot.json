@@ -9,8 +9,8 @@
       "item": "minecraft:emerald"
       //?}
     },
-    "title": { "translate": "advancement.ore_yield.jackpot.title" },
-    "description": { "translate": "advancement.ore_yield.jackpot.description" },
+    "title": { "translate": "advancement.ore_yield.jackpot.title", "fallback": "Jackpot!" },
+    "description": { "translate": "advancement.ore_yield.jackpot.description", "fallback": "Discover a mineral pocket." },
     "frame": "goal", "show_toast": true, "announce_to_chat": true, "hidden": false
   },
   "criteria": { "earned": { "trigger": "minecraft:impossible" } }

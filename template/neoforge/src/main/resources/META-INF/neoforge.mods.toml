@@ -10,6 +10,9 @@ authors="WinWeirdo"
 logoFile="icon.png"
 description='''Ores are earned from breaking stone-like blocks instead of generating as ore blocks.'''
 
+[[mixins]]
+config="ore_yield.neoforge.mixins.json"
+
 [[dependencies.ore_yield]]
 modId="neoforge"
 mandatory=true

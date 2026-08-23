@@ -9,8 +9,8 @@
       "item": "minecraft:raw_iron"
       //?}
     },
-    "title": { "translate": "advancement.ore_yield.industrial_revolution.title" },
-    "description": { "translate": "advancement.ore_yield.industrial_revolution.description" },
+    "title": { "translate": "advancement.ore_yield.industrial_revolution.title", "fallback": "Industrial Revolution" },
+    "description": { "translate": "advancement.ore_yield.industrial_revolution.description", "fallback": "Receive 1,000 Ore Yield drops." },
     "frame": "goal", "show_toast": true, "announce_to_chat": true, "hidden": false
   },
   "criteria": { "earned": { "trigger": "minecraft:impossible" } }

@@ -9,8 +9,8 @@
       "item": "minecraft:ancient_debris"
       //?}
     },
-    "title": { "translate": "advancement.ore_yield.ancient_discovery.title" },
-    "description": { "translate": "advancement.ore_yield.ancient_discovery.description" },
+    "title": { "translate": "advancement.ore_yield.ancient_discovery.title", "fallback": "Ancient Discovery" },
+    "description": { "translate": "advancement.ore_yield.ancient_discovery.description", "fallback": "Find an ancient mineral pocket." },
     "frame": "challenge", "show_toast": true, "announce_to_chat": true, "hidden": false
   },
   "criteria": { "earned": { "trigger": "minecraft:impossible" } }

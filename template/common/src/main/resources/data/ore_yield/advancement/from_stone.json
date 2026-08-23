@@ -8,9 +8,9 @@
       "item": "minecraft:stone"
       //?}
     },
-    "title": { "translate": "advancement.ore_yield.from_stone.title" },
-    "description": { "translate": "advancement.ore_yield.from_stone.description" },
-    "background": "ore_yield:textures/gui/advancements/background.png",
+    "title": { "translate": "advancement.ore_yield.from_stone.title", "fallback": "From Stone?!" },
+    "description": { "translate": "advancement.ore_yield.from_stone.description", "fallback": "Receive your first Ore Yield drop." },
+    "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
     "frame": "task", "show_toast": true, "announce_to_chat": true, "hidden": false
   },
   "criteria": { "earned": { "trigger": "minecraft:impossible" } }

@@ -1,11 +1,8 @@
 {
   "required": true,
-  "package": "com.oreyield.fabric.mixin",
+  "minVersion": "0.8",
+  "package": "com.oreyield.neoforge.mixin",
   "compatibilityLevel": "JAVA_{{java}}",
-  "mixins": [
-    "BlockDropMixin",
-    "BlockItemPlaceMixin"
-  ],
   "client": [
     "AdvancementTabMixin"
   ],

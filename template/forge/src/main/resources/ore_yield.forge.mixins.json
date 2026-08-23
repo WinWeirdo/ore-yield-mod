@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.oreyield.forge.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "ore_yield.forge.refmap.json",
+  "client": [
+    "AdvancementTabMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

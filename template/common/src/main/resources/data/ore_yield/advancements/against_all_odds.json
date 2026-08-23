@@ -9,8 +9,8 @@
       "item": "minecraft:diamond"
       //?}
     },
-    "title": { "translate": "advancement.ore_yield.against_all_odds.title" },
-    "description": { "translate": "advancement.ore_yield.against_all_odds.description" },
+    "title": { "translate": "advancement.ore_yield.against_all_odds.title", "fallback": "Against All Odds" },
+    "description": { "translate": "advancement.ore_yield.against_all_odds.description", "fallback": "Unearth a diamond through Ore Yield." },
     "frame": "goal", "show_toast": true, "announce_to_chat": true, "hidden": false
   },
   "criteria": { "earned": { "trigger": "minecraft:impossible" } }
