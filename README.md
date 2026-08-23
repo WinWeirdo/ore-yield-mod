@@ -17,7 +17,7 @@ Release notes and migration guidance are in [CHANGELOG.md](CHANGELOG.md).
 
 ### Basic Concepts
 
-Ore Yield replaces vanilla ore worldgen. Instead of finding ore blocks in walls, you mine normal stone-like blocks and receive ore drops based on probability.
+Ore Yield replaces vanilla ore worldgen (that is optional, ore removal is disabled by default). Instead of finding ore blocks in walls, you mine normal stone-like blocks and receive ore drops based on probability.
 
 **How it works:**
 1. Break a stone block (stone, deepslate, tuff, etc.)
