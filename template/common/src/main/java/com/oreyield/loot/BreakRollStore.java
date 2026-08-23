@@ -2,6 +2,7 @@ package com.oreyield.loot;
 
 import com.oreyield.config.OreConfig;
 import com.oreyield.config.OreEntry;
+import com.oreyield.compat.DragonSurvivalCompat;
 import com.oreyield.advancement.OreYieldAdvancements;
 import com.oreyield.block.HostOrigin;
 import com.oreyield.block.ProvenanceHostBlocks;
@@ -64,7 +65,8 @@ public final class BreakRollStore {
         if (origin == HostOrigin.PLAYER_PLACED && !OreConfig.allowsPlayerPlacedEligibleBlocks()) return MineralPocketResult.none();
 
         BlockState canonical = ProvenanceHostBlocks.canonicalState(state);
-        if (!isMineralPocketHost(state, canonical, dimension) || !tool.isCorrectToolForDrops(canonical)) {
+        if (!isMineralPocketHost(state, canonical, dimension)
+                || !DragonSurvivalCompat.canHarvest(tool, player, canonical)) {
             return MineralPocketResult.none();
         }
         return MineralPocketRoller.roll(random);

@@ -1,6 +1,7 @@
 package com.oreyield.config;
 
 import com.oreyield.block.ProvenanceHostBlocks;
+import com.oreyield.compat.DragonSurvivalCompat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -36,13 +37,23 @@ public record OreEntry(String id, boolean enabled, List<String> hosts, String re
 
     /**
      * Pickaxe requirement check. An empty hand is never a pickaxe: only non-player
-     * breaks (explosions, pistons) may bypass the tool requirement, so their drops
-     * work like the old "empty tool = diamond level" behaviour.
+     * breaks (explosions, pistons) may bypass the tool requirement. Optional
+     * integrations may separately validate an effective non-held harvest capability.
      */
     public boolean meetsPickaxeRequirement(ItemStack tool, Player player) {
-        if (tool.isEmpty()) return player == null;
-        int level = getPickaxeLevel(tool);
-        return level >= minPickaxeLevel;
+        if (tool.isEmpty()) {
+            if (player == null) return true;
+        } else if (getPickaxeLevel(tool) >= minPickaxeLevel) {
+            return true;
+        }
+        if (player == null || minPickaxeLevel > 3) return false;
+        BlockState representativeState = switch (Math.max(0, minPickaxeLevel)) {
+            case 0 -> Blocks.STONE.defaultBlockState();
+            case 1 -> Blocks.IRON_ORE.defaultBlockState();
+            case 2 -> Blocks.DIAMOND_ORE.defaultBlockState();
+            default -> Blocks.OBSIDIAN.defaultBlockState();
+        };
+        return DragonSurvivalCompat.canHarvest(tool, player, representativeState);
     }
 
     private static final Map<String, TagKey<net.minecraft.world.level.block.Block>> TAG_CACHE = new ConcurrentHashMap<>();
