@@ -142,6 +142,7 @@ public final class OreYieldConfigScreen extends Screen {
         putText("stone_generator_cooldown_ticks", String.valueOf(OreConfig.stoneGeneratorCooldownTicks()));
         putText("generator_ore_yield_chance_multiplier", String.valueOf(OreConfig.generatorOreYieldChanceMultiplier()));
         putText("mineral_pocket_frequency", OreConfig.mineralPocketFrequency().configKey());
+        putText("mineral_pocket_custom_chance", formatPercent(OreConfig.mineralPocketCustomChance()));
         putText("mineral_pocket_min_resource_types", String.valueOf(OreConfig.mineralPocketMinResourceTypes()));
         putText("mineral_pocket_max_resource_types", String.valueOf(OreConfig.mineralPocketMaxResourceTypes()));
         for (MineralPocketType type : MineralPocketType.values()) {
@@ -151,6 +152,7 @@ public final class OreYieldConfigScreen extends Screen {
             putText(prefix + "weight", String.valueOf(settings.weight()));
             putText(prefix + "min_count", String.valueOf(settings.minCount()));
             putText(prefix + "max_count", String.valueOf(settings.maxCount()));
+            putText(prefix + "xp", String.valueOf(settings.experience()));
         }
         initialFlags.clear();
         initialFlags.putAll(pendingFlags);
@@ -270,6 +272,7 @@ public final class OreYieldConfigScreen extends Screen {
         addToggle("mineral_pockets_allow_generator", "mineral_pockets_allow_generator");
         addToggle("mineral_pockets_allow_automated_harvesting", "mineral_pockets_allow_automated_harvesting");
         addChoiceRow("mineral_pocket_frequency", pocketFrequencyName(pocketFrequencyDraft()), this::nextPocketFrequency);
+        addTextField("mineral_pocket_custom_chance", "mineral_pocket_custom_chance", 32);
         addTextField("mineral_pocket_min_resource_types", "mineral_pocket_min_resource_types", 6);
         addTextField("mineral_pocket_max_resource_types", "mineral_pocket_max_resource_types", 6);
         addChoiceRow("mineral_pocket_type", pocketTypeName(selectedPocketType), this::nextPocketType);
@@ -278,6 +281,7 @@ public final class OreYieldConfigScreen extends Screen {
         addTextField(prefix + "weight", "mineral_pocket_category_weight", 10);
         addTextField(prefix + "min_count", "mineral_pocket_category_min_count", 6);
         addTextField(prefix + "max_count", "mineral_pocket_category_max_count", 6);
+        addTextField(prefix + "xp", "mineral_pocket_category_xp", 6);
     }
 
     private void buildWorldGeneration() {
@@ -488,11 +492,11 @@ public final class OreYieldConfigScreen extends Screen {
 
     private void resetPocketSection() {
         resetKeys("enable_mineral_pockets", "mineral_pockets_end_enabled", "mineral_pockets_allow_generator",
-                "mineral_pockets_allow_automated_harvesting", "mineral_pocket_frequency",
+                "mineral_pockets_allow_automated_harvesting", "mineral_pocket_frequency", "mineral_pocket_custom_chance",
                 "mineral_pocket_min_resource_types", "mineral_pocket_max_resource_types");
         for (MineralPocketType type : MineralPocketType.values()) {
             String prefix = pocketPrefix(type);
-            resetKeys(prefix + "enabled", prefix + "weight", prefix + "min_count", prefix + "max_count");
+            resetKeys(prefix + "enabled", prefix + "weight", prefix + "min_count", prefix + "max_count", prefix + "xp");
         }
     }
 
@@ -511,12 +515,13 @@ public final class OreYieldConfigScreen extends Screen {
         OreConfig.setValue("bad_luck_multiplier", number("bad_luck_multiplier"));
         OreConfig.setValue("generator_ore_yield_chance_multiplier", number("generator_ore_yield_chance_multiplier"));
         OreConfig.setStoneGeneratorCooldownTicks(integer("stone_generator_cooldown_ticks"));
+        OreConfig.setMineralPocketCustomChance(number("mineral_pocket_custom_chance") / 100.0D);
         OreConfig.setMineralPocketFrequency(pendingText.getOrDefault("mineral_pocket_frequency", "casual_miner"));
         OreConfig.setMineralPocketResourceTypeRange(integer("mineral_pocket_min_resource_types"), integer("mineral_pocket_max_resource_types"));
         for (MineralPocketType type : MineralPocketType.values()) {
             String prefix = pocketPrefix(type);
             OreConfig.setMineralPocketSettings(type, pendingFlags.getOrDefault(prefix + "enabled", true),
-                    integer(prefix + "weight"), integer(prefix + "min_count"), integer(prefix + "max_count"));
+                    integer(prefix + "weight"), integer(prefix + "min_count"), integer(prefix + "max_count"), integer(prefix + "xp"));
         }
         if (selectedOre != null) applyOreFields();
         OreConfig.saveAndRebuild();
@@ -533,6 +538,7 @@ public final class OreYieldConfigScreen extends Screen {
         return validateDouble("bad_luck_multiplier", 1.0D, 100.0D)
                 && validateDouble("generator_ore_yield_chance_multiplier", 0.0D, 100.0D)
                 && validateInteger("stone_generator_cooldown_ticks", 1, 1_728_000)
+                && validateDouble("mineral_pocket_custom_chance", 0.0D, 100.0D)
                 && validateInteger("mineral_pocket_min_resource_types", 1, 16)
                 && validateInteger("mineral_pocket_max_resource_types", integerOrDefault("mineral_pocket_min_resource_types", 1), 16)
                 && validatePocketFields();
@@ -543,7 +549,8 @@ public final class OreYieldConfigScreen extends Screen {
             String prefix = pocketPrefix(type);
             if (!validateInteger(prefix + "weight", 0, 1_000_000)
                     || !validateInteger(prefix + "min_count", 1, 64)
-                    || !validateInteger(prefix + "max_count", integerOrDefault(prefix + "min_count", 1), 64)) {
+                    || !validateInteger(prefix + "max_count", integerOrDefault(prefix + "min_count", 1), 64)
+                    || !validateInteger(prefix + "xp", 0, 1_024)) {
                 return false;
             }
         }
@@ -699,7 +706,7 @@ public final class OreYieldConfigScreen extends Screen {
                 case ORES -> Math.max(1, filteredOres().size() + 1);
                 case GENERATORS -> 10;
                 case COMPATIBILITY -> 5;
-                case MINERAL_POCKETS -> 12;
+                case MINERAL_POCKETS -> 14;
                 case WORLD_GENERATION -> 3;
                 case ADVANCED -> 3;
             };
@@ -768,6 +775,10 @@ public final class OreYieldConfigScreen extends Screen {
 
     private static String formatChance(double chance) {
         return String.format(Locale.ROOT, "%.3f%%", chance * 100.0D);
+    }
+
+    private static String formatPercent(double chance) {
+        return java.math.BigDecimal.valueOf(chance * 100.0D).stripTrailingZeros().toPlainString();
     }
 
     private static String quote(String value) {

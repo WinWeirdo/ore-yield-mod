@@ -4,7 +4,8 @@ package com.oreyield.config;
 public enum MineralPocketFrequency {
     DEDICATED_MINER("dedicated_miner", 4_147),
     CASUAL_MINER("casual_miner", 2_700),
-    NEWBIE_MINER("newbie_miner", 1_600);
+    NEWBIE_MINER("newbie_miner", 1_600),
+    CUSTOM("custom", 0);
 
     private final String configKey;
     private final int eligibleBreaks;
@@ -22,7 +23,12 @@ public enum MineralPocketFrequency {
         return eligibleBreaks;
     }
 
+    public boolean isCustom() {
+        return eligibleBreaks == 0;
+    }
+
     public double chance() {
+        if (isCustom()) throw new IllegalStateException("Custom mineral-pocket frequency has no fixed chance.");
         return 1.0D / eligibleBreaks;
     }
 

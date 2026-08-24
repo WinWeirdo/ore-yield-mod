@@ -43,6 +43,7 @@ public final class OreConfig {
     private static volatile boolean mineralPocketsAutomatedHarvesting = false;
     private static volatile MineralPocketFrequency mineralPocketFrequency = MineralPocketFrequency.CASUAL_MINER;
     private static volatile double mineralPocketChance = mineralPocketFrequency.chance();
+    private static volatile double mineralPocketCustomChance = mineralPocketFrequency.chance();
     private static volatile int mineralPocketMinResourceTypes = 2;
     private static volatile int mineralPocketMaxResourceTypes = 3;
     private static volatile String stoneGeneratorSurroundingItem = "minecraft:diamond";
@@ -96,11 +97,11 @@ public final class OreConfig {
 
         // The values below preserve the approved per-category rates when combined
         // with the selected mineral-pocket frequency. Counts are per selected resource type.
-        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.COAL, new MineralPocketSettings(true, 4147, 20, 44));
-        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.METAL, new MineralPocketSettings(true, 2765, 7, 18));
-        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.PRECIOUS, new MineralPocketSettings(true, 1885, 4, 9));
-        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.GEM, new MineralPocketSettings(true, 1037, 3, 8));
-        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.ANCIENT, new MineralPocketSettings(true, 166, 1, 2));
+        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.COAL, new MineralPocketSettings(true, 4147, 20, 44, MineralPocketType.COAL.defaultExperience()));
+        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.METAL, new MineralPocketSettings(true, 2765, 7, 18, MineralPocketType.METAL.defaultExperience()));
+        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.PRECIOUS, new MineralPocketSettings(true, 1885, 4, 9, MineralPocketType.PRECIOUS.defaultExperience()));
+        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.GEM, new MineralPocketSettings(true, 1037, 3, 8, MineralPocketType.GEM.defaultExperience()));
+        DEFAULT_MINERAL_POCKETS.put(MineralPocketType.ANCIENT, new MineralPocketSettings(true, 166, 1, 2, MineralPocketType.ANCIENT.defaultExperience()));
         MINERAL_POCKETS.putAll(DEFAULT_MINERAL_POCKETS);
     }
 
@@ -254,6 +255,10 @@ public final class OreConfig {
         return mineralPocketFrequency;
     }
 
+    public static double mineralPocketCustomChance() {
+        return mineralPocketCustomChance;
+    }
+
     public static int mineralPocketMinResourceTypes() {
         return mineralPocketMinResourceTypes;
     }
@@ -275,15 +280,16 @@ public final class OreConfig {
                 || ("minecraft:the_end".equals(dimension) && mineralPocketsInEnd);
     }
 
-    public static void setMineralPocketSettings(MineralPocketType type, boolean enabled, int weight, int minCount, int maxCount) {
+    public static void setMineralPocketSettings(MineralPocketType type, boolean enabled, int weight, int minCount, int maxCount, int experience) {
         int safeWeight = Math.max(0, Math.min(1_000_000, weight));
         int safeMin = Math.max(1, Math.min(64, minCount));
         int safeMax = Math.max(safeMin, Math.min(64, maxCount));
-        if (safeWeight != weight || safeMin != minCount || safeMax != maxCount) {
-            LOGGER.warn("[Ore Yield] Mineral pocket '{}' values were clamped to weight={}, min_count={}, max_count={}.",
-                    type.configKey(), safeWeight, safeMin, safeMax);
+        int safeExperience = Math.max(0, Math.min(1_024, experience));
+        if (safeWeight != weight || safeMin != minCount || safeMax != maxCount || safeExperience != experience) {
+            LOGGER.warn("[Ore Yield] Mineral pocket '{}' values were clamped to weight={}, min_count={}, max_count={}, xp={}.",
+                    type.configKey(), safeWeight, safeMin, safeMax, safeExperience);
         }
-        MINERAL_POCKETS.put(type, new MineralPocketSettings(enabled, safeWeight, safeMin, safeMax));
+        MINERAL_POCKETS.put(type, new MineralPocketSettings(enabled, safeWeight, safeMin, safeMax, safeExperience));
     }
 
     public static void setMineralPocketFrequency(String value) {
@@ -293,7 +299,16 @@ public final class OreConfig {
             parsed = MineralPocketFrequency.CASUAL_MINER;
         }
         mineralPocketFrequency = parsed;
-        mineralPocketChance = parsed.chance();
+        mineralPocketChance = parsed.isCustom() ? mineralPocketCustomChance : parsed.chance();
+    }
+
+    public static void setMineralPocketCustomChance(double value) {
+        if (!Double.isFinite(value)) {
+            LOGGER.warn("[Ore Yield] Ignoring non-finite mineral_pocket_custom_chance: {}", value);
+            return;
+        }
+        mineralPocketCustomChance = Math.max(0.0D, Math.min(1.0D, value));
+        if (mineralPocketFrequency.isCustom()) mineralPocketChance = mineralPocketCustomChance;
     }
 
     public static void setMineralPocketResourceTypeRange(int minTypes, int maxTypes) {

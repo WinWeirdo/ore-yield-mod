@@ -1,6 +1,7 @@
 package com.oreyield.loot;
 
 import com.oreyield.config.MineralPocketType;
+import com.oreyield.config.OreConfig;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -24,7 +25,7 @@ public record MineralPocketResult(MineralPocketType type, List<ItemStack> drops)
     }
 
     public int experience() {
-        return found() ? type.experience() : 0;
+        return found() ? OreConfig.mineralPocketSettings(type).experience() : 0;
     }
 
     public void announce(Player player) {

@@ -88,6 +88,7 @@ public final class OreConfigIO {
             OreConfig.setValue("mineral_pockets_end_enabled", bool(top, "mineral_pockets_end_enabled", true));
             OreConfig.setValue("mineral_pockets_allow_generator", bool(top, "mineral_pockets_allow_generator", false));
             OreConfig.setValue("mineral_pockets_allow_automated_harvesting", bool(top, "mineral_pockets_allow_automated_harvesting", false));
+            OreConfig.setMineralPocketCustomChance(decimal(top, "mineral_pocket_custom_chance", MineralPocketFrequency.CASUAL_MINER.chance()));
             OreConfig.setMineralPocketFrequency(string(top, "mineral_pocket_frequency", "casual_miner"));
             OreConfig.setMineralPocketResourceTypeRange(
                     integer(top, "mineral_pocket_min_resource_types", 2),
@@ -99,7 +100,8 @@ public final class OreConfigIO {
                         bool(top, prefix + "enabled", defaults.enabled()),
                         integer(top, prefix + "weight", defaults.weight()),
                         integer(top, prefix + "min_count", defaults.minCount()),
-                        integer(top, prefix + "max_count", defaults.maxCount()));
+                        integer(top, prefix + "max_count", defaults.maxCount()),
+                        integer(top, prefix + "xp", defaults.experience()));
             }
             boolean antiCheeseEnabled = bool(top, "enable_anti_cheese_mechanics", false);
             OreConfig.setValue("stone_generator_enabled", bool(top, "stone_generator_enabled", true));
@@ -160,6 +162,8 @@ public final class OreConfigIO {
         line(sb, "mineral_pockets_allow_automated_harvesting", OreConfig.allowsMineralPocketAutomatedHarvesting());
         sb.append("# Pocket frequency: dedicated miner = 1 per 4,147, casual miner = 1 per 2,700 (default), newbie miner = 1 per 1,600 eligible breaks.\n");
         sb.append("mineral_pocket_frequency = \"").append(OreConfig.mineralPocketFrequency().configKey()).append("\"\n");
+        sb.append("# Used only by the custom frequency profile (0.00037037037037037035 = 0.037037% = 1 per 2,700 eligible breaks).\n");
+        line(sb, "mineral_pocket_custom_chance", OreConfig.mineralPocketCustomChance());
         sb.append("# Metal and gem pockets choose this many distinct installed resources. Counts below apply to each selected resource.\n");
         line(sb, "mineral_pocket_min_resource_types", OreConfig.mineralPocketMinResourceTypes());
         line(sb, "mineral_pocket_max_resource_types", OreConfig.mineralPocketMaxResourceTypes());
@@ -289,7 +293,7 @@ public final class OreConfigIO {
                 "enable_vanilla_end_ores", "auto_detect_dimensions", "bad_luck_eliminator",
                 "bad_luck_multiplier", "enable_mineral_pockets", "mineral_pockets_end_enabled",
                 "mineral_pockets_allow_generator", "mineral_pockets_allow_automated_harvesting",
-                "mineral_pocket_frequency", "mineral_pocket_min_resource_types",
+                "mineral_pocket_frequency", "mineral_pocket_custom_chance", "mineral_pocket_min_resource_types",
                 "mineral_pocket_max_resource_types", "stone_generator_cooldown_ticks",
                 "stone_generator_enabled", "generator_tracking_blocks_enabled", "enable_anti_cheese_mechanics", "generator_ore_yield_enabled",
                 "generator_ore_yield_chance_multiplier", "allow_player_placed_eligible_blocks",
@@ -355,6 +359,7 @@ public final class OreConfigIO {
         line(sb, prefix + "weight", settings.weight());
         line(sb, prefix + "min_count", settings.minCount());
         line(sb, prefix + "max_count", settings.maxCount());
+        line(sb, prefix + "xp", settings.experience());
     }
 
     private static void appendOre(StringBuilder sb, OreEntry entry) {

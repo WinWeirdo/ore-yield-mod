@@ -95,8 +95,11 @@ mineral_pockets_end_enabled = true
 mineral_pockets_allow_generator = false
 mineral_pockets_allow_automated_harvesting = false
 
-# About one pocket per 4,147 eligible breaks when all five defaults are enabled.
-mineral_pocket_chance = 0.00024112121212121212
+# Pocket-frequency profiles: dedicated miner = 1/4,147, casual miner = 1/2,700 (default),
+# newbie miner = 1/1,600. Custom uses mineral_pocket_custom_chance.
+mineral_pocket_frequency = "casual_miner"
+# Used only with mineral_pocket_frequency = "custom". This is 0.037037% (1/2,700).
+mineral_pocket_custom_chance = 0.00037037037037037035
 # Metal and gem pockets choose 2–3 installed resource types. The amount below is per type.
 mineral_pocket_min_resource_types = 2
 mineral_pocket_max_resource_types = 3
@@ -105,29 +108,36 @@ mineral_pocket_coal_enabled = true
 mineral_pocket_coal_weight = 4147
 mineral_pocket_coal_min_count = 20
 mineral_pocket_coal_max_count = 44
+mineral_pocket_coal_xp = 7
 
 mineral_pocket_metal_enabled = true
 mineral_pocket_metal_weight = 2765
 mineral_pocket_metal_min_count = 7
 mineral_pocket_metal_max_count = 18
+mineral_pocket_metal_xp = 12
 
 mineral_pocket_precious_enabled = true
 mineral_pocket_precious_weight = 1885
 mineral_pocket_precious_min_count = 4
 mineral_pocket_precious_max_count = 9
+mineral_pocket_precious_xp = 20
 
 mineral_pocket_gem_enabled = true
 mineral_pocket_gem_weight = 1037
 mineral_pocket_gem_min_count = 3
 mineral_pocket_gem_max_count = 8
+mineral_pocket_gem_xp = 30
 
 mineral_pocket_ancient_enabled = true
 mineral_pocket_ancient_weight = 166
 mineral_pocket_ancient_min_count = 1
 mineral_pocket_ancient_max_count = 2
+mineral_pocket_ancient_xp = 50
 ```
 
-The category weights preserve the intended approximate per-break rates: Coal 1/10,000; Metal 1/15,000; Precious 1/22,000; Gem 1/40,000; Ancient 1/250,000. Metal pools use raw iron and copper plus installed Create Zinc and Mekanism Tin/Lead. Gem pools use diamond and emerald plus installed Mekanism Fluorite. A pocket announces itself after its drops are awarded.
+The **Pocket Frequency** control in the config screen cycles through the four profiles. When **Custom** is selected, edit **Custom Pocket Chance (%)**; it accepts a percentage, so `0.05` means one pocket per 2,000 eligible breaks. Each category’s **Pocket XP Bonus** is also editable in the same screen. Defaults are Coal 7, Metal 12, Precious 20, Gem 30, and Ancient 50 XP.
+
+At the Casual Miner default, the category weights produce approximate per-break rates of Coal 1/6,511; Metal 1/9,765; Precious 1/14,324; Gem 1/26,037; and Ancient 1/162,651. Metal pools use raw iron and copper plus installed Create Zinc and Mekanism Tin/Lead. Gem pools use diamond and emerald plus installed Mekanism Fluorite. A pocket announces itself after its drops are awarded.
 
 To replace native compatible ores in **new chunks only**, enable vanilla worldgen removal and leave the compatibility safeguard enabled:
 
