@@ -141,7 +141,7 @@ public final class OreYieldConfigScreen extends Screen {
         putText("bad_luck_multiplier", String.valueOf(OreConfig.badLuckMultiplier()));
         putText("stone_generator_cooldown_ticks", String.valueOf(OreConfig.stoneGeneratorCooldownTicks()));
         putText("generator_ore_yield_chance_multiplier", String.valueOf(OreConfig.generatorOreYieldChanceMultiplier()));
-        putText("mineral_pocket_chance", formatPercent(OreConfig.mineralPocketChance()));
+        putText("mineral_pocket_frequency", OreConfig.mineralPocketFrequency().configKey());
         putText("mineral_pocket_min_resource_types", String.valueOf(OreConfig.mineralPocketMinResourceTypes()));
         putText("mineral_pocket_max_resource_types", String.valueOf(OreConfig.mineralPocketMaxResourceTypes()));
         for (MineralPocketType type : MineralPocketType.values()) {
@@ -269,9 +269,7 @@ public final class OreYieldConfigScreen extends Screen {
         addToggle("mineral_pockets_end_enabled", "mineral_pockets_end_enabled");
         addToggle("mineral_pockets_allow_generator", "mineral_pockets_allow_generator");
         addToggle("mineral_pockets_allow_automated_harvesting", "mineral_pockets_allow_automated_harvesting");
-        // The shipped probability is rendered as scientific notation by Double.toString
-        // and needs more than the ordinary short-number field limit.
-        addTextField("mineral_pocket_chance", "mineral_pocket_chance", 32);
+        addChoiceRow("mineral_pocket_frequency", pocketFrequencyName(pocketFrequencyDraft()), this::nextPocketFrequency);
         addTextField("mineral_pocket_min_resource_types", "mineral_pocket_min_resource_types", 6);
         addTextField("mineral_pocket_max_resource_types", "mineral_pocket_max_resource_types", 6);
         addChoiceRow("mineral_pocket_type", pocketTypeName(selectedPocketType), this::nextPocketType);
@@ -490,7 +488,7 @@ public final class OreYieldConfigScreen extends Screen {
 
     private void resetPocketSection() {
         resetKeys("enable_mineral_pockets", "mineral_pockets_end_enabled", "mineral_pockets_allow_generator",
-                "mineral_pockets_allow_automated_harvesting", "mineral_pocket_chance",
+                "mineral_pockets_allow_automated_harvesting", "mineral_pocket_frequency",
                 "mineral_pocket_min_resource_types", "mineral_pocket_max_resource_types");
         for (MineralPocketType type : MineralPocketType.values()) {
             String prefix = pocketPrefix(type);
@@ -513,7 +511,7 @@ public final class OreYieldConfigScreen extends Screen {
         OreConfig.setValue("bad_luck_multiplier", number("bad_luck_multiplier"));
         OreConfig.setValue("generator_ore_yield_chance_multiplier", number("generator_ore_yield_chance_multiplier"));
         OreConfig.setStoneGeneratorCooldownTicks(integer("stone_generator_cooldown_ticks"));
-        OreConfig.setMineralPocketChance(number("mineral_pocket_chance") / 100.0D);
+        OreConfig.setMineralPocketFrequency(pendingText.getOrDefault("mineral_pocket_frequency", "casual_miner"));
         OreConfig.setMineralPocketResourceTypeRange(integer("mineral_pocket_min_resource_types"), integer("mineral_pocket_max_resource_types"));
         for (MineralPocketType type : MineralPocketType.values()) {
             String prefix = pocketPrefix(type);
@@ -535,7 +533,6 @@ public final class OreYieldConfigScreen extends Screen {
         return validateDouble("bad_luck_multiplier", 1.0D, 100.0D)
                 && validateDouble("generator_ore_yield_chance_multiplier", 0.0D, 100.0D)
                 && validateInteger("stone_generator_cooldown_ticks", 1, 1_728_000)
-                && validateDouble("mineral_pocket_chance", 0.0D, 100.0D)
                 && validateInteger("mineral_pocket_min_resource_types", 1, 16)
                 && validateInteger("mineral_pocket_max_resource_types", integerOrDefault("mineral_pocket_min_resource_types", 1), 16)
                 && validatePocketFields();
@@ -662,6 +659,18 @@ public final class OreYieldConfigScreen extends Screen {
         selectedPocketType = values[(selectedPocketType.ordinal() + 1) % values.length];
     }
 
+    private MineralPocketFrequency pocketFrequencyDraft() {
+        MineralPocketFrequency frequency = MineralPocketFrequency.fromConfigKey(
+                pendingText.getOrDefault("mineral_pocket_frequency", "casual_miner"));
+        return frequency == null ? MineralPocketFrequency.CASUAL_MINER : frequency;
+    }
+
+    private void nextPocketFrequency() {
+        MineralPocketFrequency[] values = MineralPocketFrequency.values();
+        MineralPocketFrequency current = pocketFrequencyDraft();
+        pendingText.put("mineral_pocket_frequency", values[(current.ordinal() + 1) % values.length].configKey());
+    }
+
     private void nextFortuneType() {
         FortuneType[] values = FortuneType.values();
         FortuneType current = FortuneType.parse(pendingText.getOrDefault("ore.fortune_type", FortuneType.NONE.name()));
@@ -733,6 +742,10 @@ public final class OreYieldConfigScreen extends Screen {
         return Component.translatable("gui.ore_yield.pocket." + type.configKey());
     }
 
+    private static Component pocketFrequencyName(MineralPocketFrequency frequency) {
+        return Component.translatable("gui.ore_yield.pocket_frequency." + frequency.configKey());
+    }
+
     private static String pocketPrefix(MineralPocketType type) {
         return "mineral_pocket_" + type.configKey() + "_";
     }
@@ -755,10 +768,6 @@ public final class OreYieldConfigScreen extends Screen {
 
     private static String formatChance(double chance) {
         return String.format(Locale.ROOT, "%.3f%%", chance * 100.0D);
-    }
-
-    private static String formatPercent(double chance) {
-        return java.math.BigDecimal.valueOf(chance * 100.0D).stripTrailingZeros().toPlainString();
     }
 
     private static String quote(String value) {

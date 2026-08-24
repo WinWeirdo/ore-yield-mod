@@ -112,6 +112,7 @@ public final class OreYieldLootModifier extends LootModifier {
         generatedLoot.addAll(pocket.drops());
         pocket.announce(player);
         OreYieldAdvancements.onMineralPocket(player, pocket);
+        totalXp += pocket.experience();
         // A global loot modifier runs only while successful block loot is being generated.
         // Keeping XP here prevents canceled break attempts from advancing pity or awarding XP.
         if (totalXp > 0 && (player == null || !player.isCreative())) {

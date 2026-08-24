@@ -20,7 +20,7 @@ public final class OreConfigIO {
             "min_y", "max_y", "peak_y", "fortune_type", "xp_min", "xp_max", "dimension",
             "min_pickaxe_level");
     private static final List<String> LEGACY_TOP_LEVEL_KEYS = List.of(
-            "stone_generator_cooldown", "stone_generator_interval_ms");
+            "stone_generator_cooldown", "stone_generator_interval_ms", "mineral_pocket_chance");
 
     // Retained when an old config is migrated or later saved from the in-game screen.
     // This prevents a new Ore Yield version from deleting server-owner extensions.
@@ -88,7 +88,7 @@ public final class OreConfigIO {
             OreConfig.setValue("mineral_pockets_end_enabled", bool(top, "mineral_pockets_end_enabled", true));
             OreConfig.setValue("mineral_pockets_allow_generator", bool(top, "mineral_pockets_allow_generator", false));
             OreConfig.setValue("mineral_pockets_allow_automated_harvesting", bool(top, "mineral_pockets_allow_automated_harvesting", false));
-            OreConfig.setValue("mineral_pocket_chance", decimal(top, "mineral_pocket_chance", 0.00024112121212121212D));
+            OreConfig.setMineralPocketFrequency(string(top, "mineral_pocket_frequency", "casual_miner"));
             OreConfig.setMineralPocketResourceTypeRange(
                     integer(top, "mineral_pocket_min_resource_types", 2),
                     integer(top, "mineral_pocket_max_resource_types", 3));
@@ -158,8 +158,8 @@ public final class OreConfigIO {
         sb.append("# Marked Stone Generator output and non-player harvesting remain disabled by default. Explosions never roll pockets.\n");
         line(sb, "mineral_pockets_allow_generator", OreConfig.allowsMineralPocketsOnGenerator());
         line(sb, "mineral_pockets_allow_automated_harvesting", OreConfig.allowsMineralPocketAutomatedHarvesting());
-        sb.append("# Master chance is approximately one pocket per 4,147 eligible breaks when all category weights are enabled.\n");
-        line(sb, "mineral_pocket_chance", OreConfig.mineralPocketChance());
+        sb.append("# Pocket frequency: dedicated miner = 1 per 4,147, casual miner = 1 per 2,700 (default), newbie miner = 1 per 1,600 eligible breaks.\n");
+        sb.append("mineral_pocket_frequency = \"").append(OreConfig.mineralPocketFrequency().configKey()).append("\"\n");
         sb.append("# Metal and gem pockets choose this many distinct installed resources. Counts below apply to each selected resource.\n");
         line(sb, "mineral_pocket_min_resource_types", OreConfig.mineralPocketMinResourceTypes());
         line(sb, "mineral_pocket_max_resource_types", OreConfig.mineralPocketMaxResourceTypes());
@@ -289,7 +289,7 @@ public final class OreConfigIO {
                 "enable_vanilla_end_ores", "auto_detect_dimensions", "bad_luck_eliminator",
                 "bad_luck_multiplier", "enable_mineral_pockets", "mineral_pockets_end_enabled",
                 "mineral_pockets_allow_generator", "mineral_pockets_allow_automated_harvesting",
-                "mineral_pocket_chance", "mineral_pocket_min_resource_types",
+                "mineral_pocket_frequency", "mineral_pocket_min_resource_types",
                 "mineral_pocket_max_resource_types", "stone_generator_cooldown_ticks",
                 "stone_generator_enabled", "generator_tracking_blocks_enabled", "enable_anti_cheese_mechanics", "generator_ore_yield_enabled",
                 "generator_ore_yield_chance_multiplier", "allow_player_placed_eligible_blocks",

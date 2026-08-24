@@ -41,7 +41,8 @@ public final class OreConfig {
     private static volatile boolean mineralPocketsInEnd = true;
     private static volatile boolean mineralPocketsOnGenerator = false;
     private static volatile boolean mineralPocketsAutomatedHarvesting = false;
-    private static volatile double mineralPocketChance = 0.00024112121212121212D;
+    private static volatile MineralPocketFrequency mineralPocketFrequency = MineralPocketFrequency.CASUAL_MINER;
+    private static volatile double mineralPocketChance = mineralPocketFrequency.chance();
     private static volatile int mineralPocketMinResourceTypes = 2;
     private static volatile int mineralPocketMaxResourceTypes = 3;
     private static volatile String stoneGeneratorSurroundingItem = "minecraft:diamond";
@@ -94,7 +95,7 @@ public final class OreConfig {
         add("end_nether_gold", new OreEntry("end_nether_gold", true, List.of(es), "minecraft:gold_nugget", 2, 6, 0.011, 0, 320, -1, FortuneType.ORE, 0, 0, enDim, 0));
 
         // The values below preserve the approved per-category rates when combined
-        // with mineral_pocket_chance. Counts are per selected resource type.
+        // with the selected mineral-pocket frequency. Counts are per selected resource type.
         DEFAULT_MINERAL_POCKETS.put(MineralPocketType.COAL, new MineralPocketSettings(true, 4147, 20, 44));
         DEFAULT_MINERAL_POCKETS.put(MineralPocketType.METAL, new MineralPocketSettings(true, 2765, 7, 18));
         DEFAULT_MINERAL_POCKETS.put(MineralPocketType.PRECIOUS, new MineralPocketSettings(true, 1885, 4, 9));
@@ -249,6 +250,10 @@ public final class OreConfig {
         return mineralPocketChance;
     }
 
+    public static MineralPocketFrequency mineralPocketFrequency() {
+        return mineralPocketFrequency;
+    }
+
     public static int mineralPocketMinResourceTypes() {
         return mineralPocketMinResourceTypes;
     }
@@ -281,12 +286,14 @@ public final class OreConfig {
         MINERAL_POCKETS.put(type, new MineralPocketSettings(enabled, safeWeight, safeMin, safeMax));
     }
 
-    public static void setMineralPocketChance(double value) {
-        if (!Double.isFinite(value)) {
-            LOGGER.warn("[Ore Yield] Ignoring non-finite mineral_pocket_chance: {}", value);
-            return;
+    public static void setMineralPocketFrequency(String value) {
+        MineralPocketFrequency parsed = MineralPocketFrequency.fromConfigKey(value);
+        if (parsed == null) {
+            LOGGER.warn("[Ore Yield] Unknown mineral_pocket_frequency '{}'; using casual_miner.", value);
+            parsed = MineralPocketFrequency.CASUAL_MINER;
         }
-        mineralPocketChance = Math.max(0.0D, Math.min(1.0D, value));
+        mineralPocketFrequency = parsed;
+        mineralPocketChance = parsed.chance();
     }
 
     public static void setMineralPocketResourceTypeRange(int minTypes, int maxTypes) {
@@ -424,8 +431,6 @@ public final class OreConfig {
                 return;
             }
             generatorOreYieldChanceMultiplier = Math.max(0.0D, Math.min(100.0D, value));
-        } else if ("mineral_pocket_chance".equals(key)) {
-            setMineralPocketChance(value);
         } else {
             LOGGER.warn("[Ore Yield] Unknown numeric config key: {}", key);
         }

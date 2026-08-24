@@ -87,6 +87,7 @@ public abstract class BlockDropMixin {
         }
         pocket.announce(player);
         OreYieldAdvancements.onMineralPocket(player, pocket);
+        totalXp += pocket.experience();
         if (totalXp > 0) {
             ExperienceOrb.award(serverLevel, Vec3.atCenterOf(pos), totalXp);
         }

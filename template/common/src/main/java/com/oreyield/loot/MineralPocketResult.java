@@ -23,10 +23,14 @@ public record MineralPocketResult(MineralPocketType type, List<ItemStack> drops)
         return type != null && !drops.isEmpty();
     }
 
+    public int experience() {
+        return found() ? type.experience() : 0;
+    }
+
     public void announce(Player player) {
         if (player == null || !found()) return;
         Component message = Component.translatable("message.ore_yield.mineral_pocket",
-                Component.translatable("message.ore_yield.mineral_pocket." + type.configKey()));
+                Component.translatable("message.ore_yield.mineral_pocket." + type.configKey()), experience());
         //? if player_display_client_message {
         player.displayClientMessage(message, true);
         //?} else {
