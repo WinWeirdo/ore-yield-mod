@@ -306,6 +306,7 @@ public final class OreConfigIO {
             keys.add(prefix + "weight");
             keys.add(prefix + "min_count");
             keys.add(prefix + "max_count");
+            keys.add(prefix + "xp");
         }
         return keys;
     }
