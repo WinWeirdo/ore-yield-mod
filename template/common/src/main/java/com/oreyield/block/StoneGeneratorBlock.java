@@ -8,6 +8,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 //?}
 import net.minecraft.server.level.ServerLevel;
+//? if player_destroy_server_level {
+import net.minecraft.server.level.ServerPlayer;
+//?}
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -56,8 +59,13 @@ public final class StoneGeneratorBlock extends Block {
     }
 
     @Override
+    //? if player_destroy_server_level {
+    public void playerDestroy(ServerLevel level, ServerPlayer player, BlockPos pos, BlockState state,
+                              BlockEntity blockEntity, ItemStack tool) {
+    //?} else {
     public void playerDestroy(Level level, Player player, BlockPos pos, BlockState state,
                               BlockEntity blockEntity, ItemStack tool) {
+    //?}
         super.playerDestroy(level, player, pos, state, blockEntity, tool);
         // The normal loot table is deliberately empty: this explicit server-side
         // drop explicitly checks vanilla diamond/netherite pickaxes, avoiding

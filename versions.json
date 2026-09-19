@@ -235,5 +235,67 @@
     "renames": {
       "ResourceLocation": "Identifier"
     }
+  },
+  {
+    "mc": "26.3",
+    "loaders": ["fabric", "neoforge"],
+    "java": 25,
+    "gradle": "9.6.0",
+    "loom": "1.17.17",
+    "loom_plugin": "net.fabricmc.fabric-loom",
+    "standalone": true,
+    "pack_format": 97,
+    "pack_format_range": true,
+    "deps": {
+      "neoforge": "26.3.0.1-beta",
+      "fabric_loader": "0.19.5",
+      "fabric_api": "0.160.7+26.3",
+      "modmenu": "21.0.0-beta.1"
+    },
+    "moddev": "2.0.147",
+    "flags": {
+      "enchant_holder_api": true,
+      "enchant_iteminstance_api": true,
+      "item_instance_api": true,
+      "resourcelocation_factory_required": true,
+      "identifier_renamed": true,
+      "loot_type_unrolling": true,
+      "tier_item_map": true,
+      "render_background_4args": true,
+      "resourcekey_identifier": true,
+      "copper_tools_exist": true,
+      "registry_get_optional": true,
+      "keymapping_category": true,
+      "window_handle": true,
+      "sdl_input_constants": true,
+      "level_is_client_side_method": true,
+      "registryaccess_lookup": true,
+      "loot_context_parameter_api": true,
+      "loot_context_get_optional_api": true,
+      "loot_modifier_holder_condition": true,
+      "screen_extract_render_state": true,
+      "screen_vanilla_background": true,
+      "break_block_event": true,
+      "player_destroy_server_level": true,
+      "loot_modifier_priority": true,
+      "neoforge_server_data": true,
+      "neoforge_registered_condition": true,
+      "fabric_keymapping_renamed": true,
+      "fabric_server_level_events": true,
+      "player_display_client_message": false,
+      "minecraft_set_screen_and_show": true,
+      "item_model_definition": true,
+      "advancement_icon_id": true,
+      "crafting_input_api": true,
+      "recipe_codec_api": true,
+      "legacy_crafting_dimensions": false,
+      "custom_recipe_serializer_api": false,
+      "singular_data_directories": true,
+      "block_properties_full_copy": true,
+      "block_properties_require_id": true
+    },
+    "renames": {
+      "ResourceLocation": "Identifier"
+    }
   }
 ]

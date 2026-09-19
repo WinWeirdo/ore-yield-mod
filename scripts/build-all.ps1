@@ -127,6 +127,7 @@ try {
     Invoke-Build '1.21.11' 21 $repoRoot $jdk21
     Invoke-Build '26.1.2' 25 (Join-Path $repoRoot 'build\generated\26.1.2') $jdk25 -Standalone
     Invoke-Build '26.2' 25 (Join-Path $repoRoot 'build\generated\26.2') $jdk25 -Standalone
+    Invoke-Build '26.3' 25 (Join-Path $repoRoot 'build\generated\26.3') $jdk25 -Standalone
 
     Write-Host "`nAll Minecraft builds completed successfully." -ForegroundColor Green
 }

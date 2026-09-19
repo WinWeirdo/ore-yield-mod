@@ -11,7 +11,11 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
+//? if sdl_input_constants {
+import com.mojang.blaze3d.platform.InputConstants;
+//?} else {
 import org.lwjgl.glfw.GLFW;
+//?}
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -53,6 +57,10 @@ public final class DebugOreInfoHandler {
     public static void onKeyInput(InputEvent.Key event) {
         if (!DEBUG_KEY.consumeClick()) return;
 
+        //? if sdl_input_constants {
+        boolean altHeld = InputConstants.isKeyDown(InputConstants.KEY_LALT)
+                || InputConstants.isKeyDown(InputConstants.KEY_RALT);
+        //?} else {
         //? if window_handle {
         long windowHandle = Minecraft.getInstance().getWindow().handle();
         //?} else {
@@ -60,6 +68,7 @@ public final class DebugOreInfoHandler {
         //?}
         boolean altHeld = GLFW.glfwGetKey(windowHandle, GLFW.GLFW_KEY_LEFT_ALT) == GLFW.GLFW_PRESS
                 || GLFW.glfwGetKey(windowHandle, GLFW.GLFW_KEY_RIGHT_ALT) == GLFW.GLFW_PRESS;
+        //?}
         if (!altHeld) return;
 
         Minecraft mc = Minecraft.getInstance();

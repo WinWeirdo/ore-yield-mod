@@ -44,7 +44,9 @@ $targets = @(
     @{ Minecraft = '26.1.2'; Loader = 'fabric' },
     @{ Minecraft = '26.1.2'; Loader = 'neoforge' },
     @{ Minecraft = '26.2'; Loader = 'fabric' },
-    @{ Minecraft = '26.2'; Loader = 'neoforge' }
+    @{ Minecraft = '26.2'; Loader = 'neoforge' },
+    @{ Minecraft = '26.3'; Loader = 'fabric' },
+    @{ Minecraft = '26.3'; Loader = 'neoforge' }
 )
 
 $plans = foreach ($target in $targets) {

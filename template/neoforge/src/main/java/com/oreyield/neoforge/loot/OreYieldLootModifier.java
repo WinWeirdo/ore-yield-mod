@@ -32,7 +32,11 @@ public final class OreYieldLootModifier extends LootModifier {
     public static final MapCodec<OreYieldLootModifier> CODEC = RecordCodecBuilder.mapCodec(instance ->
             codecStart(instance).apply(instance, OreYieldLootModifier::new));
 
-    //? if loot_modifier_priority {
+    //? if loot_modifier_holder_condition {
+    public OreYieldLootModifier(java.util.Optional<Holder<LootItemCondition>> condition, int priority) {
+        super(condition, priority);
+    }
+    //?} else if loot_modifier_priority {
     public OreYieldLootModifier(LootItemCondition[] conditions, int priority) {
         super(conditions, priority);
     }
@@ -44,7 +48,14 @@ public final class OreYieldLootModifier extends LootModifier {
 
     @Override
     protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
-        //? if loot_context_parameter_api {
+        //? if loot_context_get_optional_api {
+        if (!context.hasParameter(LootContextParams.BLOCK_STATE) || !context.hasParameter(LootContextParams.ORIGIN)) {
+            LOGGER.debug("[Ore Yield] Skipping loot context without block state/origin parameters");
+            return generatedLoot;
+        }
+        BlockState state = context.getOptional(LootContextParams.BLOCK_STATE);
+        BlockPos pos = BlockPos.containing(context.getOptional(LootContextParams.ORIGIN));
+        //?} else if loot_context_parameter_api {
         if (!context.hasParameter(LootContextParams.BLOCK_STATE) || !context.hasParameter(LootContextParams.ORIGIN)) {
             LOGGER.debug("[Ore Yield] Skipping loot context without block state/origin parameters");
             return generatedLoot;
@@ -59,7 +70,10 @@ public final class OreYieldLootModifier extends LootModifier {
         BlockState state = context.getParam(LootContextParams.BLOCK_STATE);
         BlockPos pos = BlockPos.containing(context.getParam(LootContextParams.ORIGIN));
         //?}
-        //? if item_instance_api {
+        //? if loot_context_get_optional_api {
+        net.minecraft.world.item.ItemInstance item = context.getOptional(LootContextParams.TOOL);
+        ItemStack tool = item instanceof ItemStack stack ? stack : ItemStack.EMPTY;
+        //?} else if item_instance_api {
         net.minecraft.world.item.ItemInstance item = context.getOptionalParameter(LootContextParams.TOOL);
         ItemStack tool = item instanceof ItemStack stack ? stack : ItemStack.EMPTY;
         //?} else if loot_context_parameter_api {
@@ -80,7 +94,9 @@ public final class OreYieldLootModifier extends LootModifier {
         //?} else {
         int fortune = EnchantmentHelper.getItemEnchantmentLevel(blockFortune, tool);
         //?}
-        //? if loot_context_parameter_api {
+        //? if loot_context_get_optional_api {
+        Player player = context.getOptional(LootContextParams.THIS_ENTITY) instanceof Player p ? p : null;
+        //?} else if loot_context_parameter_api {
         Player player = context.getOptionalParameter(LootContextParams.THIS_ENTITY) instanceof Player p ? p : null;
         //?} else {
         Player player = context.getParamOrNull(LootContextParams.THIS_ENTITY) instanceof Player p ? p : null;

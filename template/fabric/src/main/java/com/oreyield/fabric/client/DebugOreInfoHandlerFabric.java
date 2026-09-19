@@ -12,7 +12,11 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
+//? if sdl_input_constants {
+import com.mojang.blaze3d.platform.InputConstants;
+//?} else {
 import org.lwjgl.glfw.GLFW;
+//?}
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -27,7 +31,12 @@ public final class DebugOreInfoHandlerFabric implements ClientModInitializer {
         //?} else {
         return KeyBindingHelper.registerKeyBinding(
         //?}
-                new KeyMapping("key.ore_yield.debug_info", GLFW.GLFW_KEY_F12,
+                new KeyMapping("key.ore_yield.debug_info",
+                        //? if sdl_input_constants {
+                        InputConstants.KEY_F12,
+                        //?} else {
+                        GLFW.GLFW_KEY_F12,
+                        //?}
                         //? if keymapping_category {
                         KeyMapping.Category.MISC
                         //?} else {
@@ -43,6 +52,10 @@ public final class DebugOreInfoHandlerFabric implements ClientModInitializer {
     public void onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (DEBUG_KEY.consumeClick()) {
+                //? if sdl_input_constants {
+                boolean altHeld = InputConstants.isKeyDown(InputConstants.KEY_LALT)
+                        || InputConstants.isKeyDown(InputConstants.KEY_RALT);
+                //?} else {
                 //? if window_handle {
                 long window = client.getWindow().handle();
                 //?} else {
@@ -50,6 +63,7 @@ public final class DebugOreInfoHandlerFabric implements ClientModInitializer {
                 //?}
                 boolean altHeld = GLFW.glfwGetKey(window, GLFW.GLFW_KEY_LEFT_ALT) == GLFW.GLFW_PRESS
                         || GLFW.glfwGetKey(window, GLFW.GLFW_KEY_RIGHT_ALT) == GLFW.GLFW_PRESS;
+                //?}
                 if (!altHeld) continue;
                 if (client.player == null) continue;
 

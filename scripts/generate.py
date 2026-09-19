@@ -153,7 +153,7 @@ def build_tokens(mc: str, loader: str, entry: dict) -> dict:
         "minecraft_range": minecraft_range(mc),
         "loader_range": loader_range(deps["neoforge"]) if deps.get("neoforge") else "",
         "shadow_version": props.get("shadow_version", ""),
-        "moddev_version": props.get("moddev_version", ""),
+        "moddev_version": entry.get("moddev", props.get("moddev_version", "")),
         "mod_version": props.get("mod_version", "1.0.3"),
     }
     for key, value in deps.items():
